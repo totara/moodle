@@ -404,7 +404,7 @@ function scorm_insert_track($userid,$scormid,$scoid,$attempt,$element,$value,$fo
     }
 
     if (strstr($element, '.score.raw') ||
-        (($element == 'cmi.core.lesson_status' || $element == 'cmi.completion_status') && ($track->value == 'completed' || $track->value == 'passed'))) {
+        (($element == 'cmi.core.lesson_status' || $element == 'cmi.completion_status') && in_array($track->value, array('completed', 'passed', 'failed')))) {
         $scorm = $DB->get_record('scorm', array('id' => $scormid));
         include_once($CFG->dirroot.'/mod/scorm/lib.php');
         scorm_update_grades($scorm, $userid);

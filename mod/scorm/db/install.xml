@@ -39,7 +39,9 @@
         <FIELD NAME="height" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="600" SEQUENCE="false" PREVIOUS="width" NEXT="timeopen"/>
         <FIELD NAME="timeopen" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="height" NEXT="timeclose"/>
         <FIELD NAME="timeclose" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="timeopen" NEXT="timemodified"/>
-        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="timeclose"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="timeclose" NEXT="completionstatusrequired"/>
+        <FIELD NAME="completionstatusrequired" TYPE="int" LENGTH="1" NOTNULL="false" UNSIGNED="true" DEFAULT="null" SEQUENCE="false" PREVIOUS="timemodified" NEXT="completionscorerequired"/>
+        <FIELD NAME="completionscorerequired" TYPE="int" LENGTH="2" NOTNULL="false" UNSIGNED="true" DEFAULT="null" SEQUENCE="false" PREVIOUS="completionstatusrequired"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>

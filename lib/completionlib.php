@@ -1309,6 +1309,23 @@ class completion_info {
     }
 
     /**
+     * Aggregate activity completion state
+     *
+     * @access  public
+     * @param   int     $type   Aggregation type (COMPLETION_* constant)
+     * @param   bool    $old    Old state
+     * @param   bool    $new    New state
+     * @return  bool
+     */
+    public static function aggregate_completion_states($type, $old, $new) {
+        if ($type == COMPLETION_AND) {
+            return $old && $new;
+        } else {
+            return $old || $new;
+        }
+    }
+
+    /**
      * This is to be used only for system errors (things that shouldn't happen)
      * and not user-level errors.
      *
