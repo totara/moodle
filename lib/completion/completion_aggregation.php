@@ -44,6 +44,15 @@ class completion_aggregation extends data_object {
     public $required_fields = array('id', 'course', 'criteriatype', 'method', 'value');
 
     /**
+     * Unique fields to be used in where clauses
+     * when the ID is not known
+     *
+     * @access  public
+     * @var     array       $unique fields
+     */
+    public $unique_fields = array('course', 'criteriatype');
+
+    /**
      * Course id
      * @access  public
      * @var     int
@@ -109,6 +118,21 @@ class completion_aggregation extends data_object {
             $this->method = $method;
         } else {
             $this->method = COMPLETION_AGGREGATION_ALL;
+        }
+    }
+
+
+    /**
+     * Save aggregation method to database
+     *
+     * @access  public
+     * @return  boolean
+     */
+    public function save() {
+        if ($this->id) {
+            return $this->update();
+        } else {
+            return $this->insert();
         }
     }
 }

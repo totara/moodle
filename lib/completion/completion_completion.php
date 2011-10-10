@@ -25,6 +25,24 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 require_once($CFG->libdir.'/completion/data_object.php');
+require_once($CFG->libdir.'/completionlib.php');
+
+
+/**
+ * Course completion status constants
+ *
+ * For translating database recorded integers to strings and back
+ */
+define('COMPLETION_STATUS_NOTYETSTARTED',   10);
+define('COMPLETION_STATUS_INPROGRESS',      25);
+define('COMPLETION_STATUS_COMPLETE',        50);
+
+global $COMPLETION_STATUS;
+$COMPLETION_STATUS = array(
+    COMPLETION_STATUS_NOTYETSTARTED => 'notyetstarted',
+    COMPLETION_STATUS_INPROGRESS => 'inprogress',
+    COMPLETION_STATUS_COMPLETE => 'complete',
+);
 
 
 /**
@@ -43,7 +61,13 @@ class completion_completion extends data_object {
      * @var array $required_fields
      */
     public $required_fields = array('id', 'userid', 'course', 'deleted', 'timenotified',
-        'timeenrolled', 'timestarted', 'timecompleted', 'reaggregate');
+        'timeenrolled', 'timestarted', 'timecompleted', 'reaggregate', 'status');
+
+    /**
+     * Array of optional table fields
+     * @var array $optional_fields
+     */
+    public $optional_fields = array('name' => '');
 
     /**
      * User ID
@@ -105,10 +129,24 @@ class completion_completion extends data_object {
      */
     public $reaggregate;
 
+    /**
+     * Course name (optional field)
+     * @access  public
+     * @var     string
+     */
+    public $name;
+
+    /**
+     * Completion status constant
+     * @access  public
+     * @var     int
+     */
+    public $status;
+
 
     /**
      * Finds and returns a data_object instance based on params.
-     * @static abstract
+     * @static static
      *
      * @param array $params associative arrays varname=>value
      * @return object data_object instance or false if none found.
@@ -117,6 +155,58 @@ class completion_completion extends data_object {
         $params['deleted'] = null;
         return self::fetch_helper('course_completions', __CLASS__, $params);
     }
+
+
+    /**
+     * Return user's status
+     *
+     * Uses the following properties to calculate:
+     *  - $timeenrolled
+     *  - $timestarted
+     *  - $timecompleted
+     *  - $rpl
+     *
+     * @static static
+     *
+     * @param   object  $completion  Object with at least the described columns
+     * @return  str     Completion status lang string key
+     */
+    public static function get_status($completion) {
+        // Check if a completion record was supplied
+        if (!is_object($completion)) {
+            error('Incorrect data supplied to calculate Completion status');
+        }
+
+        // Check we have the required data, if not the user is probably not
+        // participating in the course
+        if (empty($completion->timeenrolled) &&
+            empty($completion->timestarted) &&
+            empty($completion->timecompleted))
+        {
+            return '';
+        }
+
+        // Check if complete
+        if ($completion->timecompleted) {
+            return 'complete';
+        }
+
+        // Check if in progress
+        elseif ($completion->timestarted) {
+            return 'inprogress';
+        }
+
+        // Otherwise not yet started
+        elseif ($completion->timeenrolled) {
+            return 'notyetstarted';
+        }
+
+        // Otherwise they are not participating in this course
+        else {
+            return '';
+        }
+    }
+
 
     /**
      * Return status of this completion
@@ -147,7 +237,7 @@ class completion_completion extends data_object {
             $this->timeenrolled = $timeenrolled;
         }
 
-        $this->_save();
+        return $this->_save();
     }
 
     /**
@@ -176,7 +266,7 @@ class completion_completion extends data_object {
             $this->timestarted = $timestarted;
         }
 
-        $this->_save();
+        return $this->_save();
     }
 
     /**
@@ -205,39 +295,208 @@ class completion_completion extends data_object {
         $this->timecompleted = $timecomplete;
 
         // Save record
-        $this->_save();
+        return $this->_save();
     }
 
     /**
      * Save course completion status
      *
      * This method creates a course_completions record if none exists
-     * @access  public
-     * @return  void
+     * @access  private
+     * @return  bool
      */
     private function _save() {
-
-        global $DB;
-
         if ($this->timeenrolled === null) {
             $this->timeenrolled = 0;
         }
 
+        // Update status column
+        $status = completion_completion::get_status($this);
+        if ($status) {
+            $status = constant('COMPLETION_STATUS_'.strtoupper($status));
+        }
+
+        $this->status = $status;
+
         // Save record
         if ($this->id) {
-            $this->update();
+            return $this->update();
         } else {
-            // Make sure reaggregate field is not null
+            // We should always be reaggregating when new course_completions
+            // records are created as they might have already completed some
+            // criteria before enrolling
             if (!$this->reaggregate) {
-                $this->reaggregate = 0;
+                $this->reaggregate = time();
             }
 
-			// Make sure timestarted is not null
-			if (!$this->timestarted) {
-				$this->timestarted = 0;
-			}
-			
-            $this->insert();
+            // Make sure timestarted is not null
+            if (!$this->timestarted) {
+                $this->timestarted = 0;
+            }
+
+            return $this->insert();
         }
     }
 }
+
+
+/**
+ * Scan a course (or the entire site) for tracked users who
+ * do not have completion records in courses with completion
+ * enabled and completionstartonenrol set
+ *
+ * @access  public
+ * @param   int     $courseid   (optional)
+ * @return  void
+ */
+function completion_mark_users_started($courseid = null) {
+    global $CFG, $DB;
+
+    if (debugging()) {
+        mtrace('Marking users as started');
+    }
+
+    if (!empty($CFG->gradebookroles)) {
+        $roles = ' AND ra.roleid IN ('.$CFG->gradebookroles.')';
+    } else {
+        // This causes it to default to everyone (if there is no student role)
+        $roles = '';
+    }
+
+    // Course where clause
+    $cwhere = '';
+    if ($courseid !== null) {
+        $cwhere = 'AND c.id = '.(int)$courseid;
+    }
+
+    /**
+     * A quick explaination of this horrible looking query
+     *
+     * It's purpose is to locate all the active participants
+     * of a course with course completion enabled.
+     *
+     * We also only want the users with no course_completions
+     * record as this functions job is to create the missing
+     * ones :)
+     *
+     * We want to record the user's enrolment start time for the
+     * course. This gets tricky because there can be multiple
+     * enrolment plugins active in a course, hence the possibility
+     * of multiple records for each couse/user in the results
+     */
+    $sql = "
+        SELECT
+            c.id AS course,
+            u.id AS userid,
+            crc.id AS completionid,
+            ue.timestart AS timeenrolled,
+            ue.timecreated
+        FROM
+            {user} u
+        INNER JOIN
+            {user_enrolments} ue
+         ON ue.userid = u.id
+        INNER JOIN
+            {enrol} e
+         ON e.id = ue.enrolid
+        INNER JOIN
+            {course} c
+         ON c.id = e.courseid
+        INNER JOIN
+            {role_assignments} ra
+         ON ra.userid = u.id
+        LEFT JOIN
+            {course_completions} crc
+         ON crc.course = c.id
+        AND crc.userid = u.id
+        WHERE
+            c.enablecompletion = 1
+        AND crc.timeenrolled IS NULL
+        AND ue.status = 0
+        AND e.status = 0
+        AND u.deleted = 0
+        AND ue.timestart < ?
+        AND (ue.timeend > ? OR ue.timeend = 0)
+            $cwhere
+            $roles
+        ORDER BY
+            course,
+            userid
+    ";
+
+    $now = time();
+    $rs = $DB->get_recordset_sql($sql, array($now, $now, $now, $now));
+
+    // Check if result is empty
+    if (!$rs->valid()) {
+        $rs->close(); // Not going to iterate (but exit), close rs
+        return;
+    }
+
+    /**
+     * An explaination of the following loop
+     *
+     * We are essentially doing a group by in the code here (as I can't find
+     * a decent way of doing it in the sql).
+     *
+     * Since there can be multiple enrolment plugins for each course, we can have
+     * multiple rows for each particpant in the query result. This isn't really
+     * a problem until you combine it with the fact that the enrolment plugins
+     * can save the enrol start time in either timestart or timeenrolled.
+     *
+     * The purpose of this loop is to find the earliest enrolment start time for
+     * each participant in each course.
+     */
+    $prev = null;
+    while ($rs->valid() || $prev) {
+
+        $current = $rs->current();
+
+        if (!isset($current->course)) {
+            $current = false;
+        }
+        else {
+            // Not all enrol plugins fill out timestart correctly, so use whichever
+            // is non-zero
+            $current->timeenrolled = max($current->timecreated, $current->timeenrolled);
+        }
+
+        // If we are at the last record,
+        // or we aren't at the first and the record is for a diff user/course
+        if ($prev &&
+            (!$rs->valid() ||
+            ($current->course != $prev->course || $current->userid != $prev->userid))) {
+
+            $completion = new completion_completion();
+            $completion->userid = $prev->userid;
+            $completion->course = $prev->course;
+            $completion->timeenrolled = (string) $prev->timeenrolled;
+            $completion->timestarted = $completion->timeenrolled;
+            $completion->reaggregate = time();
+
+            if ($prev->completionid) {
+                $completion->id = $prev->completionid;
+            }
+
+            $completion->mark_enrolled();
+
+            if (debugging()) {
+                mtrace('Marked started user '.$prev->userid.' in course '.$prev->course);
+            }
+        }
+        // Else, if this record is for the same user/course
+        elseif ($prev && $current) {
+            // Use oldest timeenrolled
+            $current->timeenrolled = min($current->timeenrolled, $prev->timeenrolled);
+        }
+
+        // Move current record to previous
+        $prev = $current;
+
+        // Move to next record
+        $rs->next();
+    }
+
+    $rs->close();
+}
+

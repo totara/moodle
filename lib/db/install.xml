@@ -146,7 +146,8 @@
       </KEYS>
       <INDEXES>
         <INDEX NAME="course" UNIQUE="false" FIELDS="course" NEXT="criteriatype"/>
-        <INDEX NAME="criteriatype" UNIQUE="false" FIELDS="criteriatype" PREVIOUS="course"/>
+        <INDEX NAME="criteriatype" UNIQUE="false" FIELDS="criteriatype" PREVIOUS="course" NEXT="coursecriteriatype"/>
+        <INDEX NAME="coursecriteriatype" UNIQUE="true" FIELDS="course, criteriatype" PREVIOUS="criteriatype"/>
       </INDEXES>
     </TABLE>
     <TABLE NAME="course_completion_criteria" COMMENT="Course completion criteria" PREVIOUS="course_completion_aggr_methd" NEXT="course_completion_crit_compl">
@@ -187,7 +188,8 @@
         <INDEX NAME="userid" UNIQUE="false" FIELDS="userid" NEXT="course"/>
         <INDEX NAME="course" UNIQUE="false" FIELDS="course" PREVIOUS="userid" NEXT="criteriaid"/>
         <INDEX NAME="criteriaid" UNIQUE="false" FIELDS="criteriaid" PREVIOUS="course" NEXT="timecompleted"/>
-        <INDEX NAME="timecompleted" UNIQUE="false" FIELDS="timecompleted" PREVIOUS="criteriaid"/>
+        <INDEX NAME="timecompleted" UNIQUE="false" FIELDS="timecompleted" PREVIOUS="criteriaid" NEXT="criteriaiduserid"/>
+        <INDEX NAME="criteriaiduserid" UNIQUE="true" FIELDS="criteriaid, userid" PREVIOUS="timecompleted"/>
       </INDEXES>
     </TABLE>
     <TABLE NAME="course_completion_notify" COMMENT="Course completion notification emails" PREVIOUS="course_completion_crit_compl" NEXT="course_completions">
@@ -215,7 +217,8 @@
         <FIELD NAME="timeenrolled" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="timenotified" NEXT="timestarted"/>
         <FIELD NAME="timestarted" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="timeenrolled" NEXT="timecompleted"/>
         <FIELD NAME="timecompleted" TYPE="int" LENGTH="10" NOTNULL="false" UNSIGNED="true" SEQUENCE="false" PREVIOUS="timestarted" NEXT="reaggregate"/>
-        <FIELD NAME="reaggregate" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="timecompleted"/>
+        <FIELD NAME="reaggregate" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="timecompleted" NEXT="status"/>
+        <FIELD NAME="status" TYPE="int" LENGTH="2" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="reaggregate"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
@@ -223,7 +226,8 @@
       <INDEXES>
         <INDEX NAME="userid" UNIQUE="false" FIELDS="userid" NEXT="course"/>
         <INDEX NAME="course" UNIQUE="false" FIELDS="course" PREVIOUS="userid" NEXT="timecompleted"/>
-        <INDEX NAME="timecompleted" UNIQUE="false" FIELDS="timecompleted" PREVIOUS="course"/>
+        <INDEX NAME="timecompleted" UNIQUE="false" FIELDS="timecompleted" PREVIOUS="course" NEXT="courseuserid"/>
+        <INDEX NAME="courseuserid" UNIQUE="true" FIELDS="course, userid" PREVIOUS="timecompleted"/>
       </INDEXES>
     </TABLE>
     <TABLE NAME="course_display" COMMENT="Stores info about how to display the course" PREVIOUS="course_completions" NEXT="enrol">

@@ -6728,6 +6728,63 @@ FROM
         upgrade_main_savepoint(true, 2011091600.01);
     }
 
+    // Add status column to course_completions table
+    if ($oldversion < 2011092800.01) {
+        require_once("{$CFG->libdir}/completion/completion_completion.php");
+
+        /// Remove duplicates, and then add unique indexes to certain tables
+        /// Course completions table
+        // Add unique index
+        $table = new xmldb_table('course_completions');
+        $index = new xmldb_index('courseuserid', XMLDB_INDEX_UNIQUE, array('course', 'userid'));
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+
+        /// Course completion criteria completions table
+        // Add unique index
+        $table = new xmldb_table('course_completion_crit_compl');
+        $index = new xmldb_index('criteriaiduserid', XMLDB_INDEX_UNIQUE, array('criteriaid', 'userid'));
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+
+        /// Course completion aggregation methods table
+        // Add unique index
+        $table = new xmldb_table('course_completion_agg_methd');
+        $index = new xmldb_index('coursecriteriatype', XMLDB_INDEX_UNIQUE, array('course', 'criteriatype'));
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+
+        /// Define field status to be added to course_completions
+        $table = new xmldb_table('course_completions');
+        $field = new xmldb_field('status', XMLDB_TYPE_INTEGER, '2', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, 0, 'reaggregate');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Get all records
+        $rs = $DB->get_recordset_sql('SELECT * FROM mdl_course_completions');
+        while ($rs as $record) {
+            // Update status column
+            $status = completion_completion::get_status($record);
+            if ($status) {
+                $status = constant('COMPLETION_STATUS_'.strtoupper($status));
+            }
+
+            $record->status = $status;
+
+            if (!$DB->update_record('course_completions', $record)) {
+                break;
+            }
+        }
+        $rs->close();
+
+        // Run the old completion cron code one more time before moving the code
+        // into enrol_user()
+        completion_mark_users_started();
+    }
+
     return true;
 }
-

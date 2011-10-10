@@ -44,6 +44,15 @@ class completion_criteria_completion extends data_object {
     public $required_fields = array('id', 'userid', 'course', 'criteriaid', 'gradefinal', 'rpl', 'deleted', 'unenroled', 'timecompleted');
 
     /**
+     * Unique fields to be used in where clauses
+     * when the ID is not known
+     *
+     * @access  public
+     * @var     array       $unique fields
+     */
+    public $unique_fields = array('userid', 'course', 'criteriaid');
+
+    /**
      * User ID
      * @access  public
      * @var     int

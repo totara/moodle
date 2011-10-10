@@ -24,8 +24,9 @@
  * @copyright  2010 Petr Skoda {@link http://skodak.org}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 defined('MOODLE_INTERNAL') || die();
+
+require_once("{$CFG->libdir}/completionlib.php");
 
 /** Course enrol instance enabled. (used in enrol->status) */
 define('ENROL_INSTANCE_ENABLED', 0);
@@ -1090,6 +1091,26 @@ abstract class enrol_plugin {
                 role_assign($roleid, $userid, $context->id, 'enrol_'.$name, $instance->id);
             } else {
                 role_assign($roleid, $userid, $context->id);
+            }
+        }
+
+        // If completion enabled for course, add record for user if tracked
+        $course = $DB->get_record('course', array('id' => $courseid));
+        $cinfo = new completion_info($course);
+        if ($cinfo->is_enabled() && $course->completionstartonenrol && $cinfo->is_tracked_user($userid)) {
+            // Create completion record if it doesn't already exist
+            $data = array(
+                'userid'    => $userid,
+                'course'    => $course->id
+            );
+            $completion = new completion_completion($data);
+
+            if (!$completion->id) {
+                // Completion start on enrollment needs timestarted set
+                $completion->timeenrolled = $timestart;
+                $completion->timestarted = $completion->timeenrolled;
+
+                $completion->mark_enrolled();
             }
         }
 

@@ -2001,6 +2001,17 @@ class global_navigation extends navigation_node {
                 $reporttab->add(get_string('grade'), new moodle_url('/course/user.php', array_merge($reportargs, array('mode'=>'grade'))));
             }
 
+            // Course completion tab
+            if (completion_can_view_data($user->id, $course->id)) {
+                // If not the frontpage course, check if reports are enabled
+                if ($course->id == SITEID || $course->showreports) {
+
+                    // Decide if singular or plural
+                    $ctype = $course->id == SITEID ? 'coursecompletions' : 'coursecompletion';
+                    $reporttab->add(get_string($ctype), new moodle_url('/course/user.php', array_merge($reportargs, array('mode' => $ctype))));
+                }
+            }
+
             // Check the number of nodes in the report node... if there are none remove
             // the node
             $reporttab->trim_if_empty();
