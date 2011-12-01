@@ -60,6 +60,10 @@ if ($id) { // editing course
     print_error('needcourseid');
 }
 
+// Load completion object
+$completion = new completion_info($course);
+
+
 /// Set up the page
 $streditcompletionsettings = get_string("editcoursecompletionsettings", 'completion');
 $PAGE->set_course($course);
@@ -72,13 +76,24 @@ $PAGE->set_pagelayout('standard');
 /// first create the form
 $form = new course_completion_form('completion.php?id='.$id, compact('course'));
 
+/// set data
+$currentdata = array('criteria_course' => array());
+
+// grab all course criteria and add to data array
+// as they are a special case
+foreach ($completion->get_criteria(COMPLETION_CRITERIA_TYPE_COURSE) as $criterion) {
+    $currentdata['criteria_course'][] = $criterion->courseinstance;
+}
+
+$form->set_data($currentdata);
+
+
 // now override defaults if course already exists
 if ($form->is_cancelled()){
-    redirect($CFG->wwwroot.'/course/view.php?id='.$course->id);
+    redirect("{$CFG->wwwroot}/course/view.php?id={$course->id}");
 
 } else if ($data = $form->get_data()) {
 
-    $completion = new completion_info($course);
 
 /// process criteria unlocking if requested
     if (!empty($data->settingsunlock)) {
@@ -86,7 +101,7 @@ if ($form->is_cancelled()){
         $completion->delete_course_completion_data();
 
         // Return to form (now unlocked)
-        redirect($CFG->wwwroot."/course/completion.php?id=$course->id");
+        redirect("{$CFG->wwwroot}/course/completion.php?id={$course->id}");
     }
 
 /// process data if submitted
@@ -144,15 +159,15 @@ if ($form->is_cancelled()){
 
     // Update course total passing grade
     if (!empty($data->criteria_grade)) {
-    	if ($grade_item = grade_category::fetch_course_category($course->id)->grade_item) {
-        	$grade_item->gradepass = $data->criteria_grade_value;
-        	if (method_exists($grade_item, 'update')) {
-            	$grade_item->update('course/completion.php');
-        	}
-    	}
+        if ($grade_item = grade_category::fetch_course_category($course->id)->grade_item) {
+            $grade_item->gradepass = $data->criteria_grade_value;
+            if (method_exists($grade_item, 'update')) {
+                $grade_item->update('course/completion.php');
+            }
+        }
     }
 
-    redirect($CFG->wwwroot."/course/view.php?id=$course->id", get_string('changessaved'));
+    redirect("{$CFG->wwwroot}/course/view.php?id={$course->id}");
 }
 
 
