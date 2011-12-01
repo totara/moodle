@@ -73,14 +73,9 @@ class course_completion_form extends moodleform {
                 SELECT DISTINCT
                     c.id,
                     c.category,
-                    c.fullname,
-                    cc.id AS selected
+                    c.fullname
                 FROM
                     {course} c
-                LEFT JOIN
-                    {course_completion_criteria} cc
-                 ON cc.courseinstance = c.id
-                AND cc.course = {$course->id}
                 INNER JOIN
                     {course_completion_criteria} ccc
                  ON ccc.course = c.id
@@ -103,24 +98,20 @@ class course_completion_form extends moodleform {
 
             // Get course list for select box
             $selectbox = array();
-            $selected = array();
             foreach ($courses as $c) {
                 $selectbox[$c->id] = $list[$c->category] . ' / ' . format_string($c->fullname, true, array('context' => get_context_instance(CONTEXT_COURSE, $c->id)));
-
-                // If already selected
-                if ($c->selected) {
-                    $selected[] = $c->id;
-                }
             }
 
             // Show multiselect box
             $mform->addElement('select', 'criteria_course', get_string('coursesavailable', 'completion'), $selectbox, array('multiple' => 'multiple', 'size' => 6));
-
-            // Select current criteria
-            $mform->setDefault('criteria_course', $selected);
+            $mform->disabledIf('criteria_course', 'criteria_course_none', 'eq', 1);
 
             // Explain list
             $mform->addElement('static', 'criteria_courses_explaination', '', get_string('coursesavailableexplaination', 'completion'));
+
+            // Show select none checkbox
+            $mform->addElement('checkbox', 'criteria_course_none', get_string('selectnone', 'completion'));
+            $mform->setType('checkbox', PARAM_BOOL);
 
         } else {
             $mform->addElement('static', 'nocourses', '', get_string('err_nocourses', 'completion'));
