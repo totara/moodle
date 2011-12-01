@@ -72,11 +72,15 @@ class completion_criteria_course extends completion_criteria {
      */
     public function update_config(&$data) {
 
+        // Use data_submitted as $data contains default data
+        // when nothing has been selected
+        $data = data_submitted();
         if (!empty($data->criteria_course) && is_array($data->criteria_course)) {
+            $courses = clean_param_array($data->criteria_course, PARAM_INT);
 
             $this->course = $data->id;
 
-            foreach ($data->criteria_course as $course) {
+            foreach ($courses as $course) {
 
                 $this->courseinstance = $course;
                 $this->id = NULL;
