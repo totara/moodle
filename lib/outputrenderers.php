@@ -2206,6 +2206,91 @@ EOD;
         }
         return html_writer::tag('h' . $level, $text, array('id' => $id, 'class' => renderer_base::prepare_classes($classes)));
     }
+    /**
+     * Outputs an unordered list of items.
+     *
+     * Array keys are ignored, array values are printed inside the HTML list element.
+     *
+     * Usage:
+     *
+     * $list = array('one', array('two', 'three'), 'four');
+     * echo $OUTPUT->unordered_list($list, 'myclass', 'myid');
+     *
+     * will output:
+     *
+     * <ul id="myid" class="myclass">
+     *   <li>One</li>
+     *   <li>
+     *     <ul>
+     *       <li>Two</li>
+     *       <li>Three</li>
+     *     </ul>
+     *   </li>
+     *   <li>Four</li>
+     * </ul>
+     *
+     * @param array $items Array or multi-dimensional array of items to list
+     * @param string $classes A space-separated list of CSS classes
+     * @param string $id An optional ID
+     * @return string the HTML to output.
+     */
+    public function unordered_list($items, $classes = null, $id = null) {
+        $output = '';
+
+        $output .= html_writer::start_tag('ul', array('id' => $id, 'class' => renderer_base::prepare_classes($classes)));
+        foreach ($items as $item) {
+            $output .= html_writer::start_tag('li');
+            $output .= (is_array($item)) ? $this->unordered_list($item) : $item;
+            $output .= html_writer::end_tag('li');
+        }
+        $output .= html_writer::end_tag('ul');
+
+        return $output;
+    }
+
+
+    /**
+     * Outputs an ordered list of items.
+     *
+     * Array keys are ignored, array values are printed inside the HTML list element.
+     *
+     * Usage:
+     *
+     * $list = array('one', array('two', 'three'), 'four');
+     * echo $OUTPUT->ordered_list($list, 'myclass', 'myid');
+     *
+     * will output:
+     *
+     * <ol id="myid" class="myclass">
+     *   <li>One</li>
+     *   <li>
+     *     <ol>
+     *       <li>Two</li>
+     *       <li>Three</li>
+     *     </ol>
+     *   </li>
+     *   <li>Four</li>
+     * </uol>
+     *
+     * @param array $items Array or multi-dimensional array of items to list
+     * @param string $classes A space-separated list of CSS classes
+     * @param string $id An optional ID
+     * @return string the HTML to output.
+     */
+    public function ordered_list($items, $classes = null, $id = null) {
+        $output = '';
+
+        $output .= html_writer::start_tag('ul', array('id' => $id, 'class' => renderer_base::prepare_classes($classes)));
+        foreach ($items as $item) {
+            $output .= html_writer::start_tag('li');
+            $output .= (is_array($item)) ? $this->ordered_list($item) : $item;
+            $output .= html_writer::end_tag('li');
+        }
+        $output .= html_writer::end_tag('ul');
+
+        return $output;
+    }
+
 
     /**
      * Outputs a box.
@@ -2613,6 +2698,61 @@ class core_renderer_cli extends core_renderer {
                 return $text;
         }
     }
+
+
+    /**
+     * Outputs an unordered list of items.
+     *
+     * Array keys are ignored, array values are printed inside next to an asterisk
+     *
+     * @param array $items Array or multi-dimensional array of items to list
+     * @param string $classes A space-separated list of CSS classes
+     * @param string $id An optional ID
+     * @return string the HTML to output.
+     */
+    public function unordered_list($items, $classes = null, $id = null) {
+        static $indent;
+        $text = '';
+
+        $indent .= '  ';
+        foreach ($items as $item) {
+            $text .= (is_array($item)) ? $this->unordered_list($item) : "{$indent}* {$item}\n";
+        }
+        $indent = substr($indent, 2);
+
+        return $text;
+    }
+
+
+    /**
+     * Outputs an ordered list of items.
+     *
+     * Array keys are ignored, array values are printed inside the HTML list element.
+     *
+     * @param array $items Array or multi-dimensional array of items to list
+     * @param string $classes A space-separated list of CSS classes
+     * @param string $id An optional ID
+     * @return string the HTML to output.
+     */
+    public function ordered_list($items, $classes = null, $id = null) {
+        static $indent;
+        $text = '';
+
+        $indent .= '  ';
+        $count = 1;
+        foreach ($items as $item) {
+            if (is_array($item)) {
+                $text .= $this->ordered_list($item);
+            } else {
+                $text .= "{$indent}{$count}. {$item}\n";
+                $count++;
+            }
+        }
+        $indent = substr($indent, 2);
+
+        return $text;
+    }
+
 
     /**
      * Returns a template fragment representing a fatal error.
