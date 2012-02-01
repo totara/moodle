@@ -118,7 +118,7 @@ foreach ($categories as $category) {
     if (count($table->data)) {
         echo html_writer::table($table);
     } else {
-        echo $OUTPUT->notification($strnofields);
+        echo $OUTPUT->container($strnofields);
     }
 
 } /// End of $categories foreach
