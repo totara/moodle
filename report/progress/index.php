@@ -131,7 +131,13 @@ if ($total) {
 }
 
 if ($csv && $grandtotal && count($activities)>0) { // Only show CSV if there are some users/actvs
-
+    if (strpos($CFG->wwwroot, 'https://') === 0) { //https sites - watch out for IE! KB812935 and KB3164
+        header('Cache-Control: max-age=10');
+        header('Pragma: ');
+    } else { //normal http - prevent caching at all cost
+        header('Cache-Control: private, must-revalidate, pre-check=0, post-check=0, max-age=0');
+        header('Pragma: no-cache');
+    }
     $shortname = format_string($course->shortname, true, array('context' => $context));
     $textlib = textlib_get_instance();
     header('Content-Disposition: attachment; filename=progress.'.
