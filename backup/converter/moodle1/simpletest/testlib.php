@@ -34,6 +34,7 @@ class moodle1_converter_test extends UnitTestCase {
 
     /** @var string the name of the directory containing the unpacked Moodle 1.9 backup */
     protected $tempdir;
+    protected $iconhash;
 
     public function setUp() {
         global $CFG;
@@ -61,6 +62,7 @@ class moodle1_converter_test extends UnitTestCase {
             "$CFG->dirroot/backup/converter/moodle1/simpletest/files/icon.gif",
             "$CFG->tempdir/backup/$this->tempdir/moddata/unittest/4/icon.gif"
         );
+        $this->iconhash = sha1_file("$CFG->tempdir/backup/$this->tempdir/moddata/unittest/4/icon.gif");
         copy(
             "$CFG->dirroot/backup/converter/moodle1/simpletest/files/icon.gif",
             "$CFG->tempdir/backup/$this->tempdir/moddata/unittest/4/7/icon.gif"
@@ -263,7 +265,8 @@ class moodle1_converter_test extends UnitTestCase {
         // migrate a single file
         $fileman->itemid = 4;
         $fileman->migrate_file('moddata/unittest/4/icon.gif');
-        $this->assertTrue(is_file($converter->get_workdir_path().'/files/4e/4ea114b0558f53e3af8dd9afc0e0810a95c2a724'));
+        $subdir = substr($this->iconhash, 0, 2);
+        $this->assertTrue(is_file($converter->get_workdir_path().'/files/'.$subdir.'/'.$this->iconhash));
         // get the file id
         $fileids = $fileman->get_fileids();
         $this->assertIsA($fileids, 'array');
@@ -276,7 +279,7 @@ class moodle1_converter_test extends UnitTestCase {
         $filerecordids = $converter->get_stash_itemids('files');
         foreach ($filerecordids as $filerecordid) {
             $filerecord = $converter->get_stash('files', $filerecordid);
-            $this->assertEqual('4ea114b0558f53e3af8dd9afc0e0810a95c2a724', $filerecord['contenthash']);
+            $this->assertEqual($this->iconhash, $filerecord['contenthash']);
             $this->assertEqual($contextid, $filerecord['contextid']);
             $this->assertEqual('mod_unittest', $filerecord['component']);
             if ($filerecord['filearea'] === 'testarea') {
