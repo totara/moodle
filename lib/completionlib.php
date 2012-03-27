@@ -322,8 +322,9 @@ class completion_info {
      */
     public function get_user_completion($user_id, $criteria) {
         $params = array(
-            'criteriaid'    => $criteria->id,
+            'course'        => $this->course_id,
             'userid'        => $user_id
+            'criteriaid'    => $criteria->id,
         );
 
         $completion = new completion_criteria_completion($params);
