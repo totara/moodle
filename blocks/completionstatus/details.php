@@ -158,7 +158,7 @@ if ($overall == COMPLETION_AGGREGATION_ALL) {
 echo '</td></tr></tbody></table>';
 
 // Generate markup for criteria statuses
-echo '<table class="generalbox boxaligncenter" cellpadding="3"><tbody>';
+echo '<table class="generalbox logtable boxaligncenter" id="course-completion-criteriastatus" width="100%"><tbody>';
 echo '<tr class="ccheader">';
 echo '<th class="c0 header" scope="col">'.get_string('criteriagroup', 'block_completionstatus').'</th>';
 echo '<th class="c1 header" scope="col">'.get_string('criteria', 'completion').'</th>';
@@ -176,12 +176,11 @@ global $COMPLETION_CRITERIA_TYPES;
 // Loop through course criteria
 foreach ($completions as $completion) {
     $criteria = $completion->get_criteria();
-    $complete = $completion->is_complete();
 
     $row = array();
     $row['type'] = $criteria->criteriatype;
     $row['title'] = $criteria->get_title();
-    $row['status'] = $completion->get_status();
+    $row['status'] = $completion->is_complete();
     $row['timecompleted'] = $completion->timecompleted;
     $row['details'] = $criteria->get_details($completion);
     $rows[] = $row;
@@ -190,11 +189,14 @@ foreach ($completions as $completion) {
 // Print table
 $last_type = '';
 $agg_type = false;
+$oddeven = 0;
 
 foreach ($rows as $row) {
 
+    echo '<tr class="r' . $oddeven . '">';
+
     // Criteria group
-    echo '<td class="c0">';
+    echo '<td class="cell c0">';
     if ($last_type !== $row['details']['type']) {
         $last_type = $row['details']['type'];
         echo $last_type;
@@ -221,27 +223,27 @@ foreach ($rows as $row) {
     echo '</td>';
 
     // Criteria title
-    echo '<td class="c1">';
+    echo '<td class="cell c1">';
     echo $row['details']['criteria'];
     echo '</td>';
 
     // Requirement
-    echo '<td class="c2">';
+    echo '<td class="cell c2">';
     echo $row['details']['requirement'];
     echo '</td>';
 
     // Status
-    echo '<td class="c3">';
+    echo '<td class="cell c3">';
     echo $row['details']['status'];
     echo '</td>';
 
     // Is complete
-    echo '<td class="c4">';
-    echo ($row['status'] === get_string('yes')) ? get_string('yes') : get_string('no');
+    echo '<td class="cell c4">';
+    echo $row['status'] ? get_string('yes') : get_string('no');
     echo '</td>';
 
     // Completion data
-    echo '<td class="c5">';
+    echo '<td class="cell c5">';
     if ($row['timecompleted']) {
         echo userdate($row['timecompleted'], '%e %B %G');
     } else {
@@ -249,6 +251,8 @@ foreach ($rows as $row) {
     }
     echo '</td>';
     echo '</tr>';
+    // for row striping
+    $oddeven = $oddeven ? 0 : 1;
 }
 
 echo '</tbody></table>';
