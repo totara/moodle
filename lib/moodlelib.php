@@ -10770,6 +10770,24 @@ function get_home_page() {
 }
 
 /**
+ * Given a function name or array syntax (same as first arg of call_user_func)
+ * returns true if the function or method exists
+ *
+ * @param callback $function Function name or array defining the method
+ * @return boolean true if function or method exists
+ */
+function function_or_method_exists($function) {
+    // see if it's a function
+    if (is_string($function) && function_exists($function)) {
+        return true;
+    }
+    if (is_array($function) && method_exists($function[0], $function[1])) {
+        return true;
+    }
+    return false;
+}
+
+/**
  * The lang_string class
  *
  * This special class is used to create an object representation of a string request.
@@ -10994,3 +11012,4 @@ class lang_string {
         return array('forcedstring', 'string', 'lang');
     }
 }
+

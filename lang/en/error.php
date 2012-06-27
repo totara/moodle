@@ -26,6 +26,11 @@
 $string['authnotexisting'] = 'The autorization plugin doesn\'t exist';
 $string['backupcontainexternal'] = 'This backup file contains external Moodle Network Hosts that are not configured locally';
 $string['backuptablefail'] = 'Backup tables could NOT be set up successfully!';
+$string['batchinsertargnottraverable'] = 'The second argument is not an array, moodle_recordset or other iterable type';
+$string['batchinsertinvalidparamcount'] = 'The number of parameters does not match the field count';
+$string['batchinsertitemfailedvalidation'] = 'An item provided by the iterator failed validation by function "{$a}"';
+$string['batchinsertitemnotanobject'] = 'The item provided by the iterator is not an object';
+$string['batchinsertsinglequerytoobig'] = 'The query was larger than the maximum allowed length';
 $string['blockcannotconfig'] = 'This block does not support global configuration';
 $string['blockcannotinistantiate'] = 'Problem in instantiating block object';
 $string['blockcannotread'] = 'Could not read data for blockid= {$a}';

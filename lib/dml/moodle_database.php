@@ -52,6 +52,12 @@ define('SQL_QUERY_STRUCTURE', 4);
 /** SQL_QUERY_AUX - Auxiliary query done by driver, setting connection config, getting table info, etc. */
 define('SQL_QUERY_AUX', 5);
 
+/** Maxiumum bytes in query for bulk inserts */
+define('BATCH_INSERT_MAX_QUERY_SIZE', 1*1024*1024 - 2); // 1Mb
+
+/** Maximum number of rows per bulk insert */
+define('BATCH_INSERT_MAX_ROW_COUNT', 1000);
+
 /**
  * Abstract class representing moodle database interface.
  * @link http://docs.moodle.org/dev/DML_functions
@@ -1468,6 +1474,220 @@ abstract class moodle_database {
      * @throws dml_exception A DML specific exception is thrown for any errors.
      */
     public abstract function insert_record($table, $dataobject, $returnid=true, $bulk=false);
+
+    /**
+     * Given an array of parameters to be inserted, calculate how long
+     * the raw 'values' SQL will be
+     *
+     * @param array $params Array of params to be inserted
+     * @param integer $numfields Number of fields affected
+     *
+     * @return integer Length of the params part of the SQL
+     *
+     * Example:
+     * $params = ('a',null,'c','d','e','f');
+     * $numfields = 3;
+     *
+     * $sql = "('a',NULL,'c'),('d','e','f')";
+     * $length = 28;
+     */
+    public function get_sql_length_for_params($params, $numfields) {
+        $length = 0;
+
+        // the parameters array should contain a whole number of sets of fields
+        if (!is_integer(count($params) / $numfields)) {
+            throw new dml_exception('batchinsertinvalidparamcount');
+        }
+
+        // add params include quotes or 'null'
+        $count = 0;
+        foreach($params as $param) {
+            $fieldsindex = $count % $numfields;
+
+            if ($fieldsindex == 0) {
+                if ($count != 0) {
+                    $length += 2; // outside comma and opening bracket
+                } else {
+                    $length++; // opening bracket
+                }
+            } else {
+                $length++; // inside comma
+            }
+
+            if ($fieldsindex == ($numfields - 1)) {
+                $length++;  // closing bracket
+            }
+
+            if (isset($param)) {
+                // if param set allow for quoting
+                $length += 2 + strlen($param);
+            } else {
+                // NULL will be printed
+                $length += 4;
+            }
+
+            $count++;
+
+        }
+        return $length;
+    }
+
+    /**
+     * TODO:
+     * - abstract checks out of core insert_record functions to reuse
+     * - abstract code to generate query and use for length check
+     *
+     * - check fields against table columns like in insert_record()
+     * - handle BLOBs like in insert_record()
+     * - fix issue with counting sql length with 01234 and quoted strings
+     *
+     * - write tests to try to insert all types of data including BLOBS,
+     *   unicode characters, quoted and escape characters, etc
+     *
+     *
+     * - figure out how to handle partial inserts
+     * - figure out how to handle error reporting
+     * - figure out how to get inserted IDs
+     *
+     * - offer alternative to exceptions for items that fail validation,
+     *   something that lets rest of query proceed
+     *
+     * - fix issue with transactions in test_bulk_insert_with_bad_record()
+     */
+    /**
+     * Insert multiple records into a table using batch insert syntax for speed.
+     *
+     * @param string $table The database table to be inserted into
+     * @param iterator $iterator An iterable object (such as moodle_recordset)
+     *                           containing values for one or more fields
+     * @param string $processor Name of a function to call on each item prior
+     *                          to processing. The function should receive an
+     *                          object and return a new object. Useful for
+     *                          running PHP code to reformat a moodle_recordset
+     * @return true
+     * @throws dml_exception if error
+     */
+    public function insert_records_via_batch($table, $iterator, $processor=null, $validator = null) {
+        global $CFG;
+        $status = true;
+
+        if(!is_array($iterator) && !$iterator instanceof Traversable) {
+            // Throw exception here
+            throw new dml_exception('batchinsertargnottraversable');
+        }
+
+        $transaction = $this->start_delegated_transaction();
+        $fields = $values = $params = array();
+        $count = 0;
+        foreach ($iterator as $item) {
+            if (!$item instanceof stdClass) {
+                throw new dml_exception('batchinsertitemnotanobject');
+            }
+
+            // pre-process item using user defined function
+            if (isset($processor) && function_or_method_exists($processor)) {
+                $item = call_user_func($processor, $item);
+            }
+
+            // validate the item using a user defined function
+            // If the item is not valid throw an exception
+            if (isset($validator) && function_or_method_exists($validator)) {
+                if (!call_user_func($validator, $item)) {
+                    if (is_array($validator)) {
+                        $validator = $validator[1];
+                    }
+                    throw new dml_exception('batchinsertitemfailedvalidation', $validator);
+                }
+            }
+
+            // remove 'id' field if it is set
+            if (property_exists($item, 'id')) {
+                unset($item->id);
+            }
+
+            // generate fields from object keys on first iteration
+            // and append to query
+            if ($count == 0) {
+                $properties = get_object_vars($item);
+                if ($properties) {
+                    $fields = array_keys($properties);
+                } else {
+                    throw new dml_exception('batchinsertitemnotavalidobject');
+                }
+                $numfields = count($fields);
+
+                $insert_sql = "INSERT INTO {{$table}} " .
+                    '(' . implode(',', $fields) . ') VALUES ';
+
+                // allow for substitution of actual table name
+                $insert_sql_length = strlen($insert_sql) + strlen($CFG->prefix) - 2;
+
+                // generate the placeholder for each set of values
+                $values_array = array_fill(0, $numfields, '?');
+                $values_placeholder = '(' . implode(',', $values_array) . ')';
+            }
+
+            // add values placeholder for this item to the existing ones
+            $new_values = $values;
+            $new_values[] = $values_placeholder;
+
+            // save the parameters in the correct order
+            $new_params = $params;
+            foreach ($fields as $field) {
+                $new_params[] = isset($item->$field) ? $item->$field : null;
+            }
+
+            $new_sql_length = $insert_sql_length + $this->get_sql_length_for_params($new_params, $numfields);
+
+            if ($count > 0 &&
+                ($new_sql_length > BATCH_INSERT_MAX_QUERY_SIZE ||
+                count($new_values) > BATCH_INSERT_MAX_ROW_COUNT)) {
+                // if we add this item, the query will be too big
+                // (or contain too many rows)
+                // we need to send off all existing data to be inserted,
+                // then take the data from this item and save it for the next
+                // insert
+                $sql_length = $insert_sql_length + $this->get_sql_length_for_params($params, $numfields);
+                if ($sql_length > BATCH_INSERT_MAX_QUERY_SIZE) {
+                    // query is still too big
+                    throw new dml_exception('batchinsertsinglequerytoobig');
+                }
+                $sql = $insert_sql . implode(',', $values);
+                $status = $status && $this->execute($sql, $params);
+                //echo var_export($sql, true) . '<br />';
+                //echo var_export($params, true) . '<br />';
+
+                // save this iteration's data as the first value in the next
+                // iteration
+                $count = 1;
+                $params = array_slice($new_params, -1 * $numfields);
+                $values = array($values_placeholder);
+                continue;
+            }
+
+            // keep adding to the query, we're not done yet
+            $values = $new_values;
+            $params = $new_params;
+
+            $count++;
+        }
+
+        // handle the remaining items (if any)
+        if (isset($insert_sql) && !empty($values)) {
+            $sql_length = $insert_sql_length + $this->get_sql_length_for_params($params, $numfields);
+            if ($sql_length > BATCH_INSERT_MAX_QUERY_SIZE) {
+                throw new dml_exception('batchinsertsinglequerytoobig');
+            }
+            $sql = $insert_sql . implode(',', $values);
+            $status = $status && $this->execute($sql, $params);
+            //echo 'FINAL: ';
+            //echo var_export($sql, true) . '<br />';
+            //echo var_export($params, true) . '<br />';
+        }
+
+        $transaction->allow_commit();
+        return $status;
+    }
 
     /**
      * Import a record into a table, id field is required.
