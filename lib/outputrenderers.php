@@ -1585,7 +1585,15 @@ class core_renderer extends renderer_base {
         $attributes['id'] = $id;
         $output = html_writer::tag('a', $output, $attributes);
 
-        $this->page->requires->js_init_call('M.util.help_icon.add', array(array('id'=>$id, 'url'=>$url->out(false))));
+        $jsmodule = array(
+            'name' => 'help_icon',
+            'fullpath' => '/lib/javascript-static.js',
+            'requires' => array(),
+            'strings' => array(
+                array('thisdirection', 'langconfig')
+            )
+        );
+        $this->page->requires->js_init_call('M.util.help_icon.add', array(array('id'=>$id, 'url'=>$url->out(false))), false, $jsmodule);
 
         // and finally span
         return html_writer::tag('span', $output, array('class' => 'helplink'));
@@ -1649,7 +1657,15 @@ class core_renderer extends renderer_base {
         $attributes['id'] = $id;
         $output = html_writer::tag('a', $output, $attributes);
 
-        $this->page->requires->js_init_call('M.util.help_icon.add', array(array('id'=>$id, 'url'=>$url->out(false))));
+        $jsmodule = array(
+            'name' => 'help_icon',
+            'fullpath' => '/lib/javascript-static.js',
+            'requires' => array(),
+            'strings' => array(
+                array('thisdirection', 'langconfig')
+            )
+        );
+        $this->page->requires->js_init_call('M.util.help_icon.add', array(array('id'=>$id, 'url'=>$url->out(false))), false, $jsmodule);
 
         // and finally span
         return html_writer::tag('span', $output, array('class' => 'helplink'));
