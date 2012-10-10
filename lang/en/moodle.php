@@ -1758,6 +1758,7 @@ $string['usernamenotfound'] = 'The username was not found in the database';
 $string['usernameoremail'] = 'Enter either username or email address';
 $string['usernotconfirmed'] = 'Could not confirm {$a}';
 $string['userpic'] = 'User picture';
+$string['userquotautilisation'] = 'You are currently using {$a->usedspace}Mb from your file storage quota of {$a->quota}Mb ({$a->percent}%)';
 $string['users'] = 'Users';
 $string['userselectorautoselectunique'] = 'If only one user matches the search, select them automatically';
 $string['userselectorpreserveselected'] = 'Keep selected users, even if they no longer match the search';

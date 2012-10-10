@@ -29,11 +29,26 @@ require_once("$CFG->libdir/formslib.php");
 
 class user_files_form extends moodleform {
     function definition() {
+        global $USER, $CFG;
         $mform = $this->_form;
 
         $data           = $this->_customdata['data'];
         $options        = $this->_customdata['options'];
 
+        $context = context_user::instance($USER->id);
+        $fs = get_file_storage();
+        $usedspace = 0;
+        $privatefiles = $fs->get_area_files($context->id, 'user', 'private', false, 'id', false);
+        foreach ($privatefiles as $file) {
+            $usedspace += $file->get_filesize();
+        }
+        $megabyte = 1024 * 1024;
+        $a = new stdClass();
+        $a->usedspace = round(($usedspace/$megabyte), 1);
+        $a->quota = round(($CFG->userquota/$megabyte), 1);
+        $a->percent = round((($a->usedspace/$a->quota)*100), 1);
+
+        $mform->addElement('static', 'quotautilisation', '', get_string('userquotautilisation', null, $a));
         $mform->addElement('filemanager', 'files_filemanager', get_string('files'), null, $options);
         $mform->addElement('hidden', 'returnurl', $data->returnurl);
 
@@ -42,15 +57,25 @@ class user_files_form extends moodleform {
         $this->set_data($data);
     }
     function validation($data, $files) {
-        global $CFG;
-
+        global $CFG, $USER;
+        $usercontext = context_user::instance($USER->id);
         $errors = array();
+        $options = $this->_customdata['options'];
         $draftitemid = $data['files_filemanager'];
-        $fileinfo = file_get_draft_area_info($draftitemid);
-        if ($fileinfo['filesize'] > $CFG->userquota) {
-            $errors['files_filemanager'] = get_string('userquotalimit', 'error');
+        $fs = get_file_storage();
+        $draftfiles = $fs->get_area_files($usercontext->id, 'user', 'draft', $draftitemid, 'id', false);
+        $totalsize = 0;
+        foreach ($draftfiles as $file) {
+            $filesize = $file->get_filesize();
+            if ($filesize > $options['maxbytes']) {
+                $errors['files_filemanager'] = get_string('maxbytes', 'error');
+            }
+            $totalsize += $filesize;
         }
 
+        if ($totalsize >= $CFG->userquota) {
+            $errors['files_filemanager'] = get_string('userquotaexceeded', 'error');
+        }
         return $errors;
     }
 }

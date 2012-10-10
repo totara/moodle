@@ -528,6 +528,7 @@ $string['usernotupdatedadmin'] = 'Cannot update admin accounts';
 $string['usernotupdatederror'] = 'User not updated - error';
 $string['usernotupdatednotexists'] = 'User not updated - does not exist';
 $string['userquotalimit'] = 'You have reached your file quota limit.';
+$string['userquotaexceeded'] = 'Adding this file would exceed your file quota limit. The file will not be stored.';
 $string['userselectortoomany'] = 'user_selector got more than one selected user, even though multiselect is false.';
 $string['wrongcall'] = 'This script is called wrongly';
 $string['wrongcontextid'] = 'Context ID was incorrect (cannot find it)';
