@@ -105,4 +105,19 @@ echo $OUTPUT->heading('H6 Heading', 6, 'centered');
 
 echo $OUTPUT->box_end();
 
+echo '<h2>Example output</h2>';
+include('examples/heading.php');
+
+echo '<h2>HTML output</h2>';
+echo '<pre>';
+ob_start();
+include('examples/heading.php');
+echo htmlentities(ob_get_clean());
+echo '</pre>';
+
+echo '<h2>Code to use</h2>';
+echo '<pre>';
+echo htmlentities(file_get_contents('examples/heading.php'));
+echo '</pre>';
+
 echo $OUTPUT->footer();
