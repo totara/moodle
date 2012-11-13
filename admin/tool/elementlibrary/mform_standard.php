@@ -120,7 +120,7 @@ class standard_form_elements extends moodleform {
         $mform->addElement('selectyesno', 'selectyesnofield', 'Yes/No select');
         $mform->disabledIf('selectyesnofield', 'disableelements', 'checked');
 
-        $mform->addElement('selectwithlink', 'selectwithlinkfield', 'Select with link', array(1 => 'One', 2 => 'Two', 3 => 'Three'), null, array('link' => $CFG->wwwroot.'/elementlibrary/', 'label' => 'A label'));
+        $mform->addElement('selectwithlink', 'selectwithlinkfield', 'Select with link', array(1 => 'One', 2 => 'Two', 3 => 'Three'), null, array('link' => $CFG->wwwroot.'/admin/tool/elementlibrary/', 'label' => 'A label'));
         $mform->disabledIf('selectwithlinkfield', 'disableelements', 'checked');
 
         $mform->addElement('searchableselector', 'searchableselectorfield', 'Searchable selector', get_string_manager()->get_list_of_countries(true));

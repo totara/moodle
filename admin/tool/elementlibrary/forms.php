@@ -108,11 +108,11 @@ echo $OUTPUT->render($select);
 echo html_writer::tag('p', 'A url select form. Typically used for navigation.');
 
 $urls = array(
-    '/elementlibrary/' => 'Index',
-    '/elementlibrary/common.php' => 'Common elements',
-    '/elementlibrary/mform.php' => 'Moodle form elements',
-    '/elementlibrary/tables.php' => 'Tables',
-    '/elementlibrary/tabs.php' => 'Tabs',
+    '/admin/tool/elementlibrary/' => 'Index',
+    '/admin/tool/elementlibrary/common.php' => 'Common elements',
+    '/admin/tool/elementlibrary/mform.php' => 'Moodle form elements',
+    '/admin/tool/elementlibrary/tables.php' => 'Tables',
+    '/admin/tool/elementlibrary/tabs.php' => 'Tabs',
 );
 
 echo $OUTPUT->url_select($urls, '', array('' => 'choose'), 'formid');
@@ -144,14 +144,6 @@ echo html_writer::tag('p', 'A "continue" button. You can specify the URL to go t
 
 $url = new moodle_url('index.php');
 echo $OUTPUT->continue_button($url);
-
-echo $OUTPUT->container_start();
-echo html_writer::tag('p', 'Links can be styled as buttons using class="link-as-button". They should look and act the same as form buttons:');
-echo html_writer::tag('p', '<a href="#" class="link-as-button">Link styled to look like a button</a>');
-echo html_writer::tag('p', 'If the text is smaller or larger, the button should scale accordingly:');
-echo html_writer::tag('small', html_writer::tag('small', '<a href="#" class="link-as-button">Small link</a> '));
-echo html_writer::tag('big', html_writer::tag('big', '&nbsp; <a href="#" class="link-as-button">Large link</a>'));
-echo $OUTPUT->container_end();
 
 echo html_writer::tag('p', '');
 

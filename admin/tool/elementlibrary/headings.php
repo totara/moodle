@@ -95,15 +95,6 @@ echo $OUTPUT->container('Generic container. Lorem ipsum dolor sit amet, consecte
 
 echo $OUTPUT->container_end();
 
-echo html_writer::empty_tag('hr');
-echo html_writer::tag('p', 'Use class of "centered" if you really need to centre a heading');
-echo $OUTPUT->heading('H1 Heading', 1, 'centered');
-echo $OUTPUT->heading('H2 Heading', 2, 'centered');
-echo $OUTPUT->heading('H3 Heading', 3, 'centered');
-echo $OUTPUT->heading('H4 Heading', 4, 'centered');
-echo $OUTPUT->heading('H5 Heading', 5, 'centered');
-echo $OUTPUT->heading('H6 Heading', 6, 'centered');
-
 echo $OUTPUT->box_end();
 
 echo $OUTPUT->footer();

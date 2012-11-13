@@ -96,7 +96,7 @@ echo '.someclass {
     background-image: url([[pix:t/edit]]);
 }
 .someclass2 {
-    background-image: url([[pix:totara_core|logo]]);
+    background-image: url([[pix:mod_name|logo]]);
 }
 .someclass3 {
     background-image: url([[pix:theme|t/edit]]);

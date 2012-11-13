@@ -166,7 +166,7 @@ $table->data = array(
 );
 echo html_writer::table($table);
 
-echo $OUTPUT->heading('If you need a plain table, you can either build it yourself using html_writer:', 4);
+echo $OUTPUT->heading('If you need a plain table, you can build it yourself using html_writer:', 4);
 
 echo html_writer::start_tag('table');
 echo html_writer::start_tag('tr');
@@ -183,28 +183,6 @@ echo html_writer::tag('td', 'Bottom Right');
 echo html_writer::end_tag('tr');
 echo html_writer::end_tag('table');
 
-echo $OUTPUT->heading('Or use the "invisible" or "invisiblepadded" classes which override all table border styles', 4);
-
-$table = new html_table();
-$table->head = array('Col 1', 'Col 2');
-$table->attributes = array('class' => 'invisible');
-$table->head = array('Name', 'Grade');
-$table->data = array(
-    array('This table', 'Should have'),
-    array('No border styles', 'Or margins or padding'),
-);
-echo html_writer::table($table);
-
-$table = new html_table();
-$table->head = array('Col 1', 'Col 2');
-$table->attributes = array('class' => 'invisiblepadded');
-$table->head = array('Name', 'Grade');
-$table->data = array(
-    array('This table', 'Should have'),
-    array('No border styles', 'but a reasonable amount of padding'),
-);
-echo html_writer::table($table);
-
 echo $OUTPUT->heading('A "flexible table" moodle table (class "flexible"). Useful if you want pagination, sorting etc.', 3);
 
 require_once($CFG->libdir . '/tablelib.php');
@@ -217,17 +195,6 @@ $table->setup();
 $table->add_data(array('Top Left', 'Top Right'));
 $table->add_data(array('Bottom Left', 'Bottom Right'));
 $table->finish_html();
-
-echo $OUTPUT->heading('By default tables are as small as possible given the content. Use the fullwidth class if you want the table to span all available horizontal space', 4);
-
-$table = new html_table();
-$table->attributes['class'] = 'fullwidth';
-$table->head = array('Name', 'Grade');
-$table->data = array(
-    array('Harry Potter', '76%'),
-    array('Hermione Granger', '100%'),
-);
-echo html_writer::table($table);
 
 echo $OUTPUT->heading('By default tables are left aligned. Use the boxaligncenter class if you want the table to be centred instead', 4);
 
