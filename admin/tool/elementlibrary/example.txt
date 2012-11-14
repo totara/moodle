@@ -1,0 +1,3 @@
+<?php
+echo $OUTPUT->heading('H1 Heading', 1);
+?>

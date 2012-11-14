@@ -7,7 +7,8 @@
  * @return HTML source code produced by the code in $filename
  */
 function get_source_output($filename) {
-    global $OUTPUT;
+    // we don't know what globals the file might need
+    global $OUTPUT, $USER, $SESSION, $DB, $CFG;
     if (!file_exists($filename)) {
         return false;
     }
