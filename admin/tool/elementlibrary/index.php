@@ -32,6 +32,7 @@ echo html_writer::tag('li', html_writer::link(new moodle_url('tables.php'), 'Tab
 echo html_writer::tag('li', html_writer::link(new moodle_url('forms.php'), 'Form elements'));
 echo html_writer::tag('li', html_writer::link(new moodle_url('mform.php'), 'Moodle form elements'));
 echo html_writer::tag('li', html_writer::link(new moodle_url('tabs.php'), 'Moodle tab bar elements'));
+echo html_writer::tag('li', html_writer::link(new moodle_url('paging.php'), 'Paging bar'));
 echo html_writer::tag('li', html_writer::link(new moodle_url('images.php'), 'Images'));
 echo html_writer::tag('li', html_writer::link(new moodle_url('notifications.php'), 'Notifications'));
 echo html_writer::tag('li', html_writer::link(new moodle_url('pagelayouts.php'), 'Page Layouts'));
