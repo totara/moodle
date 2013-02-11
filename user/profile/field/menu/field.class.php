@@ -25,7 +25,12 @@ class profile_field_menu extends profile_field_base {
 
         /// Set the data key
         if ($this->data !== NULL) {
-            $this->datakey = (int)array_search($this->data, $this->options);
+            // Returns false if no match found, so we can't just
+            // cast to an integer.
+            $match = array_search($this->data, $this->options);
+            if ($match !== false) {
+                $this->datakey = (int)$match;
+            }
         }
     }
 

@@ -485,8 +485,19 @@ class HTML_QuickForm_select extends HTML_QuickForm_element {
             $strHtml .= $tabs . '<select' . $attrString . ">\n";
 
             foreach ($this->_options as $option) {
-                if (is_array($this->_values) && in_array((string)$option['attr']['value'], $this->_values)) {
-                    $this->_updateAttrArray($option['attr'], array('selected' => 'selected'));
+                if (is_array($this->_values)) {
+                    // We can't use in_array() because non-strict matching is unreliable
+                    // and strict matching checks the types too. We need to cast to strings
+                    // to make sure '0' and '' are treated differently.
+                    $match = false;
+                    foreach ($this->_values as $possiblevalue) {
+                        if ((string) $possiblevalue === (string)$option['attr']['value']) {
+                            $match = true;
+                        }
+                    }
+                    if ($match) {
+                        $this->_updateAttrArray($option['attr'], array('selected' => 'selected'));
+                    }
                 }
                 $strHtml .= $tabs . "\t<option" . $this->_getAttrString($option['attr']) . '>' .
                             $option['text'] . "</option>\n";
