@@ -486,12 +486,21 @@ class HTML_QuickForm_select extends HTML_QuickForm_element {
 
             foreach ($this->_options as $option) {
                 if (is_array($this->_values)) {
-                    // We can't use in_array() because non-strict matching is unreliable
-                    // and strict matching checks the types too. We need to cast to strings
-                    // to make sure '0' and '' are treated differently.
+                    // We can't use in_array() because non-strict matching considers 0 and '' the same
+                    // but strict matching checks the types too. There are places in the code that rely on:
+                    //    (int)1 == (string)1
+                    // and others that rely on
+                    //    (float)1 == (float)1.0
+                    // so non-strict matching with a special case check seems to be the only way.
                     $match = false;
                     foreach ($this->_values as $possiblevalue) {
-                        if ((string) $possiblevalue === (string)$option['attr']['value']) {
+                        // need to prevent 0 and '' being considered the same
+                        if ($possiblevalue === '' && $option['attr']['value'] === 0) {
+                            continue;
+                        }
+                        // don't use strict matching as some places rely on (int)1 == (string)1
+                        // or (float)1 = (float)1.0
+                        if ($possiblevalue == $option['attr']['value']) {
                             $match = true;
                         }
                     }
