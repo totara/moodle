@@ -230,6 +230,17 @@ class qtype_multichoice_single_question extends qtype_multichoice_base {
     public function is_choice_selected($response, $value) {
         return (string) $response === (string) $value;
     }
+
+    public function clear_wrong_from_response(array $response) {
+        foreach ($this->order as $key => $answerid) {
+            if ($key == $response['answer'] &&
+                    !question_state::graded_state_for_fraction(
+                    $this->answers[$answerid]->fraction)->is_correct()) {
+                $response['answer'] = -1;
+            }
+        }
+        return $response;
+    }
 }
 
 
