@@ -32,8 +32,10 @@ defined('MOODLE_INTERNAL') || die();
  */
 class award_criteria_overall extends award_criteria {
 
-    /* @var int Criteria [BADGE_CRITERIA_TYPE_OVERALL] */
-    public $criteriatype = BADGE_CRITERIA_TYPE_OVERALL;
+    /* @var int Criteria ['overall'] */
+    public $criteriatype = 'overall';
+    /* @var array Supported badge types */
+    public static $supportedtypes = array(BADGE_TYPE_COURSE, BADGE_TYPE_SITE);
 
     /**
      * Add appropriate form elements to the criteria form
@@ -78,7 +80,7 @@ class award_criteria_overall extends award_criteria {
      *
      * @return string
      */
-    public function get_details($short = '') {
+    public function get_details($short = false) {
     }
 
     /**
@@ -101,7 +103,7 @@ class award_criteria_overall extends award_criteria {
         $params = array(
                     'userid' => $userid,
                     'badgeid' => $this->badgeid,
-                    'criteriatype' => BADGE_CRITERIA_TYPE_OVERALL
+                    'criteriatype' => 'overall'
                 );
 
         $criteria = $DB->get_records_sql($sql, $params);

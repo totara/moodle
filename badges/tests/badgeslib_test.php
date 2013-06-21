@@ -131,12 +131,12 @@ class core_badgeslib_testcase extends advanced_testcase {
 
     public function test_create_badge_criteria() {
         $badge = new badge($this->badgeid);
-        $criteria_overall = award_criteria::build(array('criteriatype' => BADGE_CRITERIA_TYPE_OVERALL, 'badgeid' => $badge->id));
+        $criteria_overall = award_criteria::build(array('criteriatype' => 'overall', 'badgeid' => $badge->id));
         $criteria_overall->save(array('agg' => BADGE_CRITERIA_AGGREGATION_ALL));
 
         $this->assertCount(1, $badge->get_criteria());
 
-        $criteria_profile = award_criteria::build(array('criteriatype' => BADGE_CRITERIA_TYPE_PROFILE, 'badgeid' => $badge->id));
+        $criteria_profile = award_criteria::build(array('criteriatype' => 'profile', 'badgeid' => $badge->id));
         $params = array('agg' => BADGE_CRITERIA_AGGREGATION_ALL, 'field_address' => 'address');
         $criteria_profile->save($params);
 
@@ -144,13 +144,13 @@ class core_badgeslib_testcase extends advanced_testcase {
     }
 
     public function test_delete_badge_criteria() {
-        $criteria_overall = award_criteria::build(array('criteriatype' => BADGE_CRITERIA_TYPE_OVERALL, 'badgeid' => $this->badgeid));
+        $criteria_overall = award_criteria::build(array('criteriatype' => 'overall', 'badgeid' => $this->badgeid));
         $criteria_overall->save(array('agg' => BADGE_CRITERIA_AGGREGATION_ALL));
         $badge = new badge($this->badgeid);
 
-        $this->assertInstanceOf('award_criteria_overall', $badge->criteria[BADGE_CRITERIA_TYPE_OVERALL]);
+        $this->assertInstanceOf('award_criteria_overall', $badge->criteria['overall']);
 
-        $badge->criteria[BADGE_CRITERIA_TYPE_OVERALL]->delete();
+        $badge->criteria['overall']->delete();
         $this->assertEmpty($badge->get_criteria());
     }
 

@@ -26,62 +26,6 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-/*
- * Role completion criteria type
- * Criteria type constant, primarily for storing criteria type in the database.
- */
-define('BADGE_CRITERIA_TYPE_OVERALL', 0);
-
-/*
- * Activity completion criteria type
- * Criteria type constant, primarily for storing criteria type in the database.
- */
-define('BADGE_CRITERIA_TYPE_ACTIVITY', 1);
-
-/*
- * Duration completion criteria type
- * Criteria type constant, primarily for storing criteria type in the database.
- */
-define('BADGE_CRITERIA_TYPE_MANUAL', 2);
-
-/*
- * Grade completion criteria type
- * Criteria type constant, primarily for storing criteria type in the database.
- */
-define('BADGE_CRITERIA_TYPE_SOCIAL', 3);
-
-/*
- * Course completion criteria type
- * Criteria type constant, primarily for storing criteria type in the database.
-*/
-define('BADGE_CRITERIA_TYPE_COURSE', 4);
-
-/*
- * Courseset completion criteria type
- * Criteria type constant, primarily for storing criteria type in the database.
- */
-define('BADGE_CRITERIA_TYPE_COURSESET', 5);
-
-/*
- * Course completion criteria type
- * Criteria type constant, primarily for storing criteria type in the database.
- */
-define('BADGE_CRITERIA_TYPE_PROFILE', 6);
-
-/*
- * Criteria type constant to class name mapping
- */
-global $BADGE_CRITERIA_TYPES;
-$BADGE_CRITERIA_TYPES = array(
-    BADGE_CRITERIA_TYPE_OVERALL   => 'overall',
-    BADGE_CRITERIA_TYPE_ACTIVITY  => 'activity',
-    BADGE_CRITERIA_TYPE_MANUAL    => 'manual',
-    BADGE_CRITERIA_TYPE_SOCIAL    => 'social',
-    BADGE_CRITERIA_TYPE_COURSE    => 'course',
-    BADGE_CRITERIA_TYPE_COURSESET => 'courseset',
-    BADGE_CRITERIA_TYPE_PROFILE   => 'profile'
-);
-
 /**
  * Award criteria abstract definition
  *
@@ -92,6 +36,8 @@ abstract class award_criteria {
     public $method;
     public $badgeid;
     public $params = array();
+    /* @var array Supported badge types (e.g. BADGE_TYPE_COURSE, BADGE_TYPE_SITE) */
+    public static $supportedtypes = array();
 
     /**
      * The base constructor
@@ -108,21 +54,50 @@ abstract class award_criteria {
     }
 
     /**
+     * Return an array of all existing criteria types
+     *
+     * @return array Array of criteria names installed on this site.
+     */
+    public static function get_all_criteria() {
+        global $CFG;
+        $criteriadirectory = $CFG->dirroot . '/badges/criteria/';
+        $files = scandir($criteriadirectory);
+        $criteria = array();
+        foreach ($files as $file) {
+            // Exclude current and parent directories.
+            if ($file == '.' || $file == '..') {
+                continue;
+            }
+            // Must be a directory containing a lib.php file.
+            $libfile = "{$criteriadirectory}/{$file}/lib.php";
+            if (!file_exists($libfile)) {
+                continue;
+            }
+            // TODO: include and check for class too?
+            $criteria[] = $file;
+        }
+        return $criteria;
+    }
+
+    /**
      * Factory method for creating criteria class object
      *
      * @param array $params associative arrays varname => value
      * @return award_criteria
      */
     public static function build($params) {
-        global $CFG, $BADGE_CRITERIA_TYPES;
+        global $CFG;
+        $allcriteria = self::get_all_criteria();
 
-        if (!isset($params['criteriatype']) || !isset($BADGE_CRITERIA_TYPES[$params['criteriatype']])) {
+        $criteriatype = isset($params['criteriatype']) ? $params['criteriatype'] : null;
+
+        if (!in_array($criteriatype, $allcriteria)) {
             print_error('error:invalidcriteriatype', 'badges');
         }
 
-        $class = 'award_criteria_' . $BADGE_CRITERIA_TYPES[$params['criteriatype']];
-        require_once($CFG->dirroot . '/badges/criteria/' . $class . '.php');
-
+        $libfile = $CFG->dirroot . "/badges/criteria/{$criteriatype}/lib.php";
+        require_once($libfile);
+        $class = "award_criteria_{$criteriatype}";
         return new $class($params);
     }
 
@@ -138,10 +113,10 @@ abstract class award_criteria {
     /**
      * Get criteria details for displaying to users
      *
-     * @param string $short Print short version of criteria
+     * @param boolean $short Print short version of criteria
      * @return string
      */
-    abstract public function get_details($short = '');
+    abstract public function get_details($short = false);
 
     /**
      * Add appropriate criteria options to the form

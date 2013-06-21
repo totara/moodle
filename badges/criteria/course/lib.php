@@ -35,8 +35,10 @@ require_once($CFG->libdir . '/gradelib.php');
  */
 class award_criteria_course extends award_criteria {
 
-    /* @var int Criteria [BADGE_CRITERIA_TYPE_COURSE] */
-    public $criteriatype = BADGE_CRITERIA_TYPE_COURSE;
+    /* @var int Criteria ['course'] */
+    public $criteriatype = 'course';
+    /* @var array Supported badge types */
+    public static $supportedtypes = array(BADGE_TYPE_COURSE);
 
     public $required_param = 'course';
     public $optional_params = array('grade', 'bydate');
@@ -72,7 +74,7 @@ class award_criteria_course extends award_criteria {
      *
      * @return string
      */
-    public function get_details($short = '') {
+    public function get_details($short = false) {
         global $DB;
         $param = reset($this->params);
 

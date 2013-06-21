@@ -68,7 +68,7 @@ if ((($update == BADGE_CRITERIA_AGGREGATION_ALL) || ($update == BADGE_CRITERIA_A
     require_sesskey();
     require_capability('moodle/badges:configurecriteria', $context);
     $obj = new stdClass();
-    $obj->id = $badge->criteria[BADGE_CRITERIA_TYPE_OVERALL]->id;
+    $obj->id = $badge->criteria['overall']->id;
     $obj->method = $update;
     if ($DB->update_record('badge_criteria', $obj)) {
         $msg = get_string('changessaved');

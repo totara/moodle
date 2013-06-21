@@ -33,8 +33,10 @@ require_once($CFG->libdir . '/completionlib.php');
  */
 class award_criteria_activity extends award_criteria {
 
-    /* @var int Criteria [BADGE_CRITERIA_TYPE_ACTIVITY] */
-    public $criteriatype = BADGE_CRITERIA_TYPE_ACTIVITY;
+    /* @var int Criteria ['activity'] */
+    public $criteriatype = 'activity';
+    /* @var array Supported badge types */
+    public static $supportedtypes = array(BADGE_TYPE_COURSE);
 
     private $courseid;
 
@@ -72,7 +74,7 @@ class award_criteria_activity extends award_criteria {
      *
      * @return string
      */
-    public function get_details($short = '') {
+    public function get_details($short = false) {
         global $DB, $OUTPUT;
         $output = array();
         foreach ($this->params as $p) {

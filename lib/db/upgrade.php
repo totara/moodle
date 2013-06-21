@@ -2363,5 +2363,72 @@ function xmldb_main_upgrade($oldversion) {
         upgrade_main_savepoint(true, 2013082700.00);
     }
 
+    if ($oldversion < 2013090100.00) {
+
+        // Migrate from integer criteriatypes to strings to support criteria as subplugins.
+        // Need to drop indexes before changing field type and recreate afterwards.
+
+        // Define index criteriatype (not unique) to be dropped form badge_criteria.
+        $table = new xmldb_table('badge_criteria');
+        $index = new xmldb_index('criteriatype', XMLDB_INDEX_NOTUNIQUE, array('criteriatype'));
+
+        // Conditionally launch drop index criteriatype.
+        if ($dbman->index_exists($table, $index)) {
+            $dbman->drop_index($table, $index);
+        }
+
+        // Define index badgecriteriatype (unique) to be dropped form badge_criteria.
+        $table = new xmldb_table('badge_criteria');
+        $index = new xmldb_index('badgecriteriatype', XMLDB_INDEX_UNIQUE, array('badgeid', 'criteriatype'));
+
+        // Conditionally launch drop index badgecriteriatype.
+        if ($dbman->index_exists($table, $index)) {
+            $dbman->drop_index($table, $index);
+        }
+
+        // Changing type of field criteriatype on table badge_criteria to char.
+        $table = new xmldb_table('badge_criteria');
+        $field = new xmldb_field('criteriatype', XMLDB_TYPE_CHAR, '255', null, null, null, null, 'badgeid');
+
+        // Launch change of type for field criteriatype.
+        $dbman->change_field_type($table, $field);
+
+        // Migrate the data.
+        $criteriatypemappings = array(
+            0 => 'overall',
+            1 => 'activity',
+            2 => 'manual',
+            3 => 'social',
+            4 => 'course',
+            5 => 'courseset',
+            6 => 'profile'
+        );
+        foreach ($criteriatypemappings as $old => $new) {
+            $sql = "UPDATE {badge_criteria} SET criteriatype = ? WHERE criteriatype = ?";
+            $DB->execute($sql, array($new, $old));
+        }
+
+        // Define index criteriatype (not unique) to be added to badge_criteria.
+        $table = new xmldb_table('badge_criteria');
+        $index = new xmldb_index('criteriatype', XMLDB_INDEX_NOTUNIQUE, array('criteriatype'));
+
+        // Conditionally launch add index criteriatype.
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+
+        // Define index badgecriteriatype (unique) to be added to badge_criteria.
+        $table = new xmldb_table('badge_criteria');
+        $index = new xmldb_index('badgecriteriatype', XMLDB_INDEX_UNIQUE, array('badgeid', 'criteriatype'));
+
+        // Conditionally launch add index badgecriteriatype.
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+
+        // Main savepoint reached.
+        upgrade_main_savepoint(true, 2013090100.00);
+    }
+
     return true;
 }

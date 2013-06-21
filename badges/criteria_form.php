@@ -42,10 +42,10 @@ class edit_criteria_form extends moodleform {
         $course = $this->_customdata['course'];
 
         // Get course selector first if it's a new courseset criteria.
-        if (($criteria->id == 0 || $addcourse) && $criteria->criteriatype == BADGE_CRITERIA_TYPE_COURSESET) {
+        if (($criteria->id == 0 || $addcourse) && $criteria->criteriatype == 'courseset') {
             $criteria->get_courses($mform);
         } else {
-            if ($criteria->id == 0 && $criteria->criteriatype == BADGE_CRITERIA_TYPE_COURSE) {
+            if ($criteria->id == 0 && $criteria->criteriatype == 'course') {
                 $mform->addElement('hidden', 'course', $course);
                 $mform->setType('course', PARAM_INT);
             }

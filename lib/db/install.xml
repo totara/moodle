@@ -2909,7 +2909,7 @@
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="badgeid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
-        <FIELD NAME="criteriatype" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="The criteria type we are aggregating"/>
+        <FIELD NAME="criteriatype" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="The criteria type we are aggregating"/>
         <FIELD NAME="method" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="1 = all, 2 = any"/>
       </FIELDS>
       <KEYS>

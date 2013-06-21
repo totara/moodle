@@ -1,0 +1,4 @@
+MDL-39864 TODO:
+
+* Move lang strings for criteria into subplugins
+* fix key sort on criteria.php page

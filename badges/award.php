@@ -76,7 +76,7 @@ if (!$badge->is_active()) {
 $output = $PAGE->get_renderer('core', 'badges');
 
 // Roles that can award this badge.
-$acceptedroles = array_keys($badge->criteria[BADGE_CRITERIA_TYPE_MANUAL]->params);
+$acceptedroles = array_keys($badge->criteria['manual']->params);
 
 if (count($acceptedroles) > 1) {
     // If there is more than one role that can award a badge, prompt user to make a selection.
@@ -148,7 +148,7 @@ if ($award && data_submitted() && has_capability('moodle/badges:awardbadge', $co
         if (process_manual_award($user->id, $USER->id, $issuerrole->roleid, $badgeid)) {
             // If badge was successfully awarded, review manual badge criteria.
             $data = new stdClass();
-            $data->crit = $badge->criteria[BADGE_CRITERIA_TYPE_MANUAL];
+            $data->crit = $badge->criteria['manual'];
             $data->userid = $user->id;
             badges_award_handle_manual_criteria_review($data);
         } else {

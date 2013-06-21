@@ -25,7 +25,7 @@
  */
 
 defined('MOODLE_INTERNAL') || die();
-require_once('award_criteria_course.php');
+require_once($CFG->dirroot . '/badges/criteria/course/lib.php');
 require_once($CFG->libdir . '/completionlib.php');
 require_once($CFG->dirroot . '/grade/querylib.php');
 require_once($CFG->libdir . '/gradelib.php');
@@ -36,8 +36,10 @@ require_once($CFG->libdir . '/gradelib.php');
  */
 class award_criteria_courseset extends award_criteria {
 
-    /* @var int Criteria [BADGE_CRITERIA_TYPE_COURSESET] */
-    public $criteriatype = BADGE_CRITERIA_TYPE_COURSESET;
+    /* @var int Criteria ['courseset'] */
+    public $criteriatype = 'courseset';
+    /* @var array Supported badge types */
+    public static $supportedtypes = array(BADGE_TYPE_SITE);
 
     public $required_param = 'course';
     public $optional_params = array('grade', 'bydate');
@@ -47,7 +49,7 @@ class award_criteria_courseset extends award_criteria {
      *
      * @return string
      */
-    public function get_details($short = '') {
+    public function get_details($short = false) {
         global $DB, $OUTPUT;
         $output = array();
         foreach ($this->params as $p) {
