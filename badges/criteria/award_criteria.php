@@ -73,10 +73,29 @@ abstract class award_criteria {
             if (!file_exists($libfile)) {
                 continue;
             }
-            // TODO: include and check for class too?
             $criteria[] = $file;
         }
+        usort($criteria, 'self::criteria_sort');
         return $criteria;
+    }
+
+    /**
+     * Sorting function to sort criteria alphabetically, but with 'overall' at the top
+     *
+     * @param string $str1 The first value to compare
+     * @param string $str2 The second value to compare
+     * @return integer -1, 0 or 1 depending on how the strings compare. See strcmp().
+     */
+    public static function criteria_sort($str1, $str2) {
+        if ($str1 == 'overall' && $str2 == 'overall') {
+            return 0;
+        } else if ($str1 == 'overall') {
+            return -1;
+        } else if ($str2 == 'overall') {
+            return 1;
+        } else {
+            return strcmp($str1, $str2);
+        }
     }
 
     /**
