@@ -23,6 +23,6 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['description'] = 'Learners are awarded this badge when they complete <strong>{$a}</strong> of the listed requirements.';
+$string['description'] = 'Users are awarded this badge when they complete <strong>{$a}</strong> of the listed requirements.';
 $string['description_short'] = 'Complete <strong>{$a}</strong> of: ';
 $string['pluginname'] = 'This badge is awarded when...';

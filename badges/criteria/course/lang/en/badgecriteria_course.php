@@ -24,9 +24,9 @@
  */
 
 $string['completionnotenabled'] = 'Course completion is not enabled for this course, so it cannot be included in badge criteria. Course completion may be enabled in the course settings.';
-$string['description'] = 'Learners must complete the course ';
+$string['description'] = 'Users must complete the course ';
 $string['description_short'] = 'Complete the course ';
-$string['description_single'] = 'Learners must complete the course ';
+$string['description_single'] = 'Users must complete the course ';
 $string['description_single_short'] = 'Complete the course ';
 $string['pluginname'] = 'Course completion';
 $string['pluginname_help'] = 'Allows a badge to be awarded to users who have completed the course. This criterion can have additional parameters such as minimum grade and date of course completion.';
