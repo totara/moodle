@@ -126,7 +126,7 @@ abstract class award_criteria {
      * @return string
      */
     public function get_title() {
-        return get_string('criteria_' . $this->criteriatype, 'badges');
+        return get_string('pluginname', 'badgecriteria_' . $this->criteriatype);
     }
 
     /**
@@ -212,14 +212,14 @@ abstract class award_criteria {
         if (!$data->is_locked() && !$data->is_active()) {
             echo $OUTPUT->box($deleteaction . $editaction, array('criteria-header'));
         }
-        echo $OUTPUT->heading($this->get_title() . $OUTPUT->help_icon('criteria_' . $this->criteriatype, 'badges'), 3, 'main help');
+        echo $OUTPUT->heading($this->get_title() . $OUTPUT->help_icon('pluginname', 'badgecriteria_' . $this->criteriatype), 3, 'main help');
 
         if (!empty($this->params)) {
             if (count($this->params) > 1) {
-                echo $OUTPUT->box(get_string('criteria_descr_' . $this->criteriatype, 'badges',
+                echo $OUTPUT->box(get_string('description', 'badgecriteria_' . $this->criteriatype,
                         strtoupper($agg[$data->get_aggregation_method($this->criteriatype)])), array('clearfix'));
             } else {
-                echo $OUTPUT->box(get_string('criteria_descr_single_' . $this->criteriatype , 'badges'), array('clearfix'));
+                echo $OUTPUT->box(get_string('description_single', 'badgecriteria_' . $this->criteriatype), array('clearfix'));
             }
             echo $OUTPUT->box($this->get_details(), array('clearfix'));
         }

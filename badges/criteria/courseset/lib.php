@@ -153,7 +153,7 @@ class award_criteria_courseset extends award_criteria {
         $none = true;
 
         $mform->addElement('header', 'first_header', $this->get_title());
-        $mform->addHelpButton('first_header', 'criteria_' . $this->criteriatype, 'badges');
+        $mform->addHelpButton('first_header', 'pluginname', 'badgecriteria_' . $this->criteriatype);
 
         if ($courses = $DB->get_records('course', array('enablecompletion' => COMPLETION_ENABLED))) {
             $mform->addElement('submit', 'addcourse', get_string('addcourse', 'badges'), array('class' => 'addcourse'));

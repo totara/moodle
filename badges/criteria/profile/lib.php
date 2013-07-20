@@ -82,7 +82,7 @@ class award_criteria_profile extends award_criteria {
 
         if (!empty($dfields)) {
             $mform->addElement('header', 'first_header', $this->get_title());
-            $mform->addHelpButton('first_header', 'criteria_' . $this->criteriatype, 'badges');
+            $mform->addHelpButton('first_header', 'pluginname', 'badgecriteria_' . $this->criteriatype);
             foreach ($dfields as $field) {
                 $checked = false;
                 if (in_array($field, $existing)) {

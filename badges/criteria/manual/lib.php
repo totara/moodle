@@ -87,7 +87,7 @@ class award_criteria_manual extends award_criteria {
 
         if (!empty($roleids)) {
             $mform->addElement('header', 'first_header', $this->get_title());
-            $mform->addHelpButton('first_header', 'criteria_' . $this->criteriatype, 'badges');
+            $mform->addHelpButton('first_header', 'pluginname', 'badgecriteria_' . $this->criteriatype);
             foreach ($roleids as $rid) {
                 $checked = false;
                 if (in_array($rid, $existing)) {

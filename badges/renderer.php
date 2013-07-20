@@ -355,9 +355,9 @@ class core_badges_renderer extends plugin_renderer_base {
         foreach ($badge->criteria as $type => $c) {
             if (in_array($c->id, $eids)) {
                 if (count($c->params) == 1) {
-                    $items[] = get_string('criteria_descr_single_' . $type , 'badges') . $c->get_details();
+                    $items[] = get_string('description_single', 'badgecriteria_' . $type) . $c->get_details();
                 } else {
-                    $items[] = get_string('criteria_descr_' . $type , 'badges',
+                    $items[] = get_string('description', 'badgecriteria_' . $type,
                             strtoupper($agg[$badge->get_aggregation_method($type)])) . $c->get_details();
                 }
             }
@@ -689,7 +689,7 @@ class core_badges_renderer extends plugin_renderer_base {
     // Prints badge criteria.
     public function print_badge_criteria(badge $badge, $short = false) {
         $output = "";
-        $shortstr = $short ? 'short_' : '';
+        $shortstr = $short ? '_short' : '';
         $agg = $badge->get_aggregation_methods();
         if (empty($badge->criteria)) {
             return get_string('nocriteria', 'badges');
@@ -698,16 +698,16 @@ class core_badges_renderer extends plugin_renderer_base {
                 $output .= get_string('criteria_descr', 'badges');
             }
         } else {
-            $output .= get_string('criteria_descr_' . $shortstr . 'overall', 'badges',
+            $output .= get_string('description' . $shortstr, 'badgecriteria_overall',
                                     strtoupper($agg[$badge->get_aggregation_method()]));
         }
         $items = array();
         unset($badge->criteria['overall']);
         foreach ($badge->criteria as $type => $c) {
             if (count($c->params) == 1) {
-                $items[] = get_string('criteria_descr_single_' . $shortstr . $type , 'badges') . $c->get_details($short);
+                $items[] = get_string('description_single' . $shortstr, 'badgecriteria_' . $type) . $c->get_details($short);
             } else {
-                $items[] = get_string('criteria_descr_' . $shortstr . $type , 'badges',
+                $items[] = get_string('description' . $shortstr , 'badgecriteria_' . $type,
                         strtoupper($agg[$badge->get_aggregation_method($type)])) . $c->get_details($short);
             }
         }
@@ -730,7 +730,7 @@ class core_badges_renderer extends plugin_renderer_base {
                 $select = array();
                 foreach ($potential as $p) {
                     if ($p != 'overall') {
-                        $select[$p] = get_string('criteria_' . $p, 'badges');
+                        $select[$p] = get_string('pluginname', 'badgecriteria_' . $p);
                     }
                 }
                 $actions[] = get_string('addbadgecriteria', 'badges');
