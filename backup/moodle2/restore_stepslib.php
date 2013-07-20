@@ -2086,14 +2086,14 @@ class restore_badges_structure_step extends restore_structure_step {
 
         $oldparam = explode('_', $data->name);
 
-        if ($data->criteriatype == BADGE_CRITERIA_TYPE_ACTIVITY) {
+        if ($data->criteriatype == 'activity') {
             $module = $this->get_mappingid('course_module', $oldparam[1]);
             $params['name'] = $oldparam[0] . '_' . $module;
             $params['value'] = $oldparam[0] == 'module' ? $module : $data->value;
-        } else if ($data->criteriatype == BADGE_CRITERIA_TYPE_COURSE) {
+        } else if ($data->criteriatype == 'course') {
             $params['name'] = $oldparam[0] . '_' . $this->get_courseid();
             $params['value'] = $oldparam[0] == 'course' ? $this->get_courseid() : $data->value;
-        } else if ($data->criteriatype == BADGE_CRITERIA_TYPE_MANUAL) {
+        } else if ($data->criteriatype == 'manual') {
             $role = $this->get_mappingid('role', $data->value);
             if (!empty($role)) {
                 $params['name'] = 'role_' . $role;
