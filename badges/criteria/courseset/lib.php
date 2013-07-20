@@ -96,11 +96,11 @@ class award_criteria_courseset extends award_criteria {
                 $selected = array_keys($this->params);
             }
             $settings = array('multiple' => 'multiple', 'size' => 20, 'style' => 'width:300px');
-            $mform->addElement('select', 'courses', get_string('addcourse', 'badges'), $select, $settings);
-            $mform->addRule('courses', get_string('requiredcourse', 'badges'), 'required');
-            $mform->addHelpButton('courses', 'addcourse', 'badges');
+            $mform->addElement('select', 'courses', get_string('addcourse', 'badgecriteria_courseset'), $select, $settings);
+            $mform->addRule('courses', get_string('requiredcourse', 'badgecriteria_courseset'), 'required');
+            $mform->addHelpButton('courses', 'addcourse', 'badgecriteria_courseset');
 
-            $buttonarray[] =& $mform->createElement('submit', 'submitcourse', get_string('addcourse', 'badges'));
+            $buttonarray[] =& $mform->createElement('submit', 'submitcourse', get_string('addcourse', 'badgecriteria_courseset'));
             $buttonarray[] =& $mform->createElement('submit', 'cancel', get_string('cancel'));
             $mform->addGroup($buttonarray, 'buttonar', '', array(' '), false);
 
@@ -156,7 +156,7 @@ class award_criteria_courseset extends award_criteria {
         $mform->addHelpButton('first_header', 'pluginname', 'badgecriteria_' . $this->criteriatype);
 
         if ($courses = $DB->get_records('course', array('enablecompletion' => COMPLETION_ENABLED))) {
-            $mform->addElement('submit', 'addcourse', get_string('addcourse', 'badges'), array('class' => 'addcourse'));
+            $mform->addElement('submit', 'addcourse', get_string('addcourse', 'badgecriteria_courseset'), array('class' => 'addcourse'));
         }
 
         // In courseset, print out only the ones that were already selected.
@@ -187,8 +187,8 @@ class award_criteria_courseset extends award_criteria {
         if (!$none) {
             $mform->addElement('header', 'aggregation', get_string('method', 'badges'));
             $agg = array();
-            $agg[] =& $mform->createElement('radio', 'agg', '', get_string('allmethodcourseset', 'badges'), 1);
-            $agg[] =& $mform->createElement('radio', 'agg', '', get_string('anymethodcourseset', 'badges'), 2);
+            $agg[] =& $mform->createElement('radio', 'agg', '', get_string('allmethod', 'badgecriteria_courseset'), 1);
+            $agg[] =& $mform->createElement('radio', 'agg', '', get_string('anymethod', 'badgecriteria_courseset'), 2);
             $mform->addGroup($agg, 'methodgr', '', array('<br/>'), false);
             if ($this->id !== 0) {
                 $mform->setDefault('agg', $this->method);

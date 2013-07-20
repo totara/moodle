@@ -23,9 +23,12 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['pluginname'] = 'Profile completion';
-$string['pluginname_help'] = 'Allows a badge to be awarded to users for completing certain fields in their profile. You can select from default and custom profile fields that are available to users. ';
+$string['allmethod'] = 'All of the selected profile fields have been completed';
+$string['anymethod'] = 'Any of the selected profile fields has been completed';
 $string['description'] = '<strong>{$a}</strong> of the following user profile fields have to be completed:';
 $string['description_short'] = 'Complete <strong>{$a}</strong> of: ';
 $string['description_single'] = 'The following user profile field has to be completed:';
 $string['description_single_short'] = 'Complete: ';
+$string['error:nosuchfield'] = 'Warning: This user profile field is no longer available.';
+$string['pluginname'] = 'Profile completion';
+$string['pluginname_help'] = 'Allows a badge to be awarded to users for completing certain fields in their profile. You can select from default and custom profile fields that are available to users. ';

@@ -23,9 +23,13 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['pluginname'] = 'Activity completion';
-$string['pluginname_help'] = 'Allows a badge to be awarded to users based on the completion of a set of activities within a course.';
+$string['allmethod'] = 'All of the selected activities are complete';
+$string['anymethod'] = 'Any of the selected activities is complete';
 $string['description'] = '<strong>{$a}</strong> of the following activities are completed:';
 $string['description_short'] = 'Complete <strong>{$a}</strong> of: ';
 $string['description_single'] = 'The following activity has to be completed:';
 $string['description_single_short'] = 'Complete: ';
+$string['error:noactivities'] = 'There are no activities with completion criteria enabled in this course.';
+$string['error:nosuchmod'] = 'Warning: This activity is no longer available.';
+$string['pluginname'] = 'Activity completion';
+$string['pluginname_help'] = 'Allows a badge to be awarded to users based on the completion of a set of activities within a course.';

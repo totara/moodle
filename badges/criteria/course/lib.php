@@ -112,7 +112,7 @@ class award_criteria_course extends award_criteria {
 
         if (!($course->enablecompletion == COMPLETION_ENABLED)) {
             $none = true;
-            $message = get_string('completionnotenabled', 'badges');
+            $message = get_string('completionnotenabled', 'badgecriteria_course');
         } else {
             $mform->addElement('header', 'criteria_course', $this->get_title());
             $mform->addHelpButton('criteria_course', 'pluginname', 'badgecriteria_' . $this->criteriatype);

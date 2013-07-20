@@ -80,7 +80,7 @@ class award_criteria_activity extends award_criteria {
         foreach ($this->params as $p) {
             $mod = self::get_mod_instance($p['module']);
             if (!$mod) {
-                $str = $OUTPUT->error_text(get_string('error:nosuchmod', 'badges'));
+                $str = $OUTPUT->error_text(get_string('error:nosuchmod', 'badgecriteria_activity'));
             } else {
                 $str = html_writer::tag('b', '"' . ucfirst($mod->modname) . ' - ' . $mod->name . '"');
                 if (isset($p['bydate'])) {
@@ -134,7 +134,7 @@ class award_criteria_activity extends award_criteria {
             $mform->addHelpButton('category_errors', 'criterror', 'badges');
             foreach ($missing as $m) {
                 $this->config_options($mform, array('id' => $m, 'checked' => true,
-                        'name' => get_string('error:nosuchmod', 'badges'), 'error' => true));
+                        'name' => get_string('error:nosuchmod', 'badgecriteria_activity'), 'error' => true));
                 $none = false;
             }
         }
@@ -169,8 +169,8 @@ class award_criteria_activity extends award_criteria {
         if (!$none) {
             $mform->addElement('header', 'aggregation', get_string('method', 'badges'));
             $agg = array();
-            $agg[] =& $mform->createElement('radio', 'agg', '', get_string('allmethodactivity', 'badges'), 1);
-            $agg[] =& $mform->createElement('radio', 'agg', '', get_string('anymethodactivity', 'badges'), 2);
+            $agg[] =& $mform->createElement('radio', 'agg', '', get_string('allmethod', 'badgecriteria_activity'), 1);
+            $agg[] =& $mform->createElement('radio', 'agg', '', get_string('anymethod', 'badgecriteria_activity'), 2);
             $mform->addGroup($agg, 'methodgr', '', array('<br/>'), false);
             if ($this->id !== 0) {
                 $mform->setDefault('agg', $this->method);
@@ -179,7 +179,7 @@ class award_criteria_activity extends award_criteria {
             }
         }
 
-        return array($none, get_string('error:noactivities', 'badges'));
+        return array($none, get_string('error:noactivities', 'badgecriteria_activity'));
     }
 
     /**

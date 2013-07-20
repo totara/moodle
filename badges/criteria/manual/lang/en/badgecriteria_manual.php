@@ -23,9 +23,12 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['pluginname'] = 'Manual issue by role';
-$string['pluginname_help'] = 'Allows a badge to be awarded manually by users who have a particular role within the site or course.';
+$string['allmethod'] = 'All of the selected roles award the badge';
+$string['anymethod'] = 'Any of the selected roles awards the badge';
 $string['description'] = 'This badge has to be awarded by the users with <strong>{$a}</strong> of the following roles:';
 $string['description_short'] = 'Awarded by <strong>{$a}</strong> of: ';
 $string['description_single'] = 'This badge has to be awarded by a user with the following role:';
 $string['description_single_short'] = 'Awarded by: ';
+$string['error:nosuchrole'] = 'Warning: This role is no longer available.';
+$string['pluginname'] = 'Manual issue by role';
+$string['pluginname_help'] = 'Allows a badge to be awarded manually by users who have a particular role within the site or course.';

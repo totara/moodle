@@ -23,9 +23,14 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['pluginname'] = 'Completing a set of courses';
-$string['pluginname_help'] = 'Allows a badge to be awarded to users who have completed a set of courses. Each course can have additional parameters such as minimum grade and date of course completion. ';
+$string['addcourse'] = 'Add courses';
+$string['addcourse_help'] = 'Select all courses that should be added to this badge requirement. Hold CTRL key to select multiple items.';
+$string['allmethod'] = 'All of the selected courses are complete';
+$string['anymethod'] = 'Any of the selected courses is complete';
 $string['description'] = '<strong>{$a}</strong> of the following courses have to be completed:';
 $string['description_short'] = 'Complete <strong>{$a}</strong> of: ';
 $string['description_single'] = 'The following course has to be completed:';
 $string['description_single_short'] = 'Complete: ';
+$string['pluginname'] = 'Completing a set of courses';
+$string['pluginname_help'] = 'Allows a badge to be awarded to users who have completed a set of courses. Each course can have additional parameters such as minimum grade and date of course completion. ';
+$string['requiredcourse'] = 'At least one course should be added to the courseset criterion.';
