@@ -129,6 +129,8 @@ if ($activate && has_capability('moodle/badges:configuredetails', $PAGE->context
 
     if (!$badge->has_criteria()) {
         $err = get_string('error:cannotact', 'badges') . get_string('nocriteria', 'badges');
+    } else if ($badge->has_invalid_criteria()) {
+        $err = get_string('error:cannotact', 'badges') . get_string('invalidcriteria', 'badges');
     } else {
         if ($badge->is_locked()) {
             $badge->set_status(BADGE_STATUS_ACTIVE_LOCKED);
