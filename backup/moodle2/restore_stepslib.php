@@ -2062,6 +2062,7 @@ class restore_badges_structure_step extends restore_structure_step {
         global $DB;
 
         $data = (object)$data;
+        $this->remap_integer_criteria_types($data);
 
         $params = array(
                 'badgeid'      => $this->get_new_parentid('badge'),
@@ -2078,6 +2079,7 @@ class restore_badges_structure_step extends restore_structure_step {
         require_once($CFG->libdir . '/badgeslib.php');
 
         $data = (object)$data;
+        $this->remap_integer_criteria_types($data);
         $criteriaid = $this->get_new_parentid('criterion');
 
         // Parameter array that will go to database.
@@ -2129,6 +2131,27 @@ class restore_badges_structure_step extends restore_structure_step {
     protected function after_execute() {
         // Add related files.
         $this->add_related_files('badges', 'badgeimage', 'badge');
+    }
+
+    /**
+     * Function to handle integer criteria types, in case the backup file
+     * comes from a 2.5 install.
+     */
+    private function remap_integer_criteria_types(&$data) {
+
+        $criteriatypemappings = array(
+            0 => 'overall',
+            1 => 'activity',
+            2 => 'manual',
+            3 => 'social',
+            4 => 'course',
+            5 => 'courseset',
+            6 => 'profile'
+        );
+
+        if (array_key_exists($data->criteriatype, $criteriatypemappings)) {
+            $data->criteriatype = $criteriatypemappings[$data->criteriatype];
+        }
     }
 }
 
