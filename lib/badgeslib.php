@@ -1096,9 +1096,10 @@ function badges_award_handle_profile_criteria_review(stdClass $eventdata) {
  * Triggered when badge is manually awarded.
  *
  * @param   object      $data
+ * @param bool $nobake Not baking actual badges (for testing purposes)
  * @return  boolean
  */
-function badges_award_handle_manual_criteria_review(stdClass $data) {
+function badges_award_handle_manual_criteria_review(stdClass $data, $nobake = false) {
     $criteria = $data->crit;
     $userid = $data->userid;
     $badge = new badge($criteria->badgeid);
@@ -1112,7 +1113,7 @@ function badges_award_handle_manual_criteria_review(stdClass $data) {
 
         if ($badge->criteria['overall']->review($userid)) {
             $badge->criteria['overall']->mark_complete($userid);
-            $badge->issue($userid);
+            $badge->issue($userid, $nobake);
         }
     }
 

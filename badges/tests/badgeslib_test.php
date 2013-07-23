@@ -171,6 +171,56 @@ class core_badgeslib_testcase extends advanced_testcase {
         $this->assertCount(2, $badge->get_awards());
     }
 
+    public function data_for_invalid_criteria_test() {
+        return array(
+            // When aggregation is all, invalid criteria should prevent awarding.
+            array(BADGE_CRITERIA_AGGREGATION_ALL, 0),
+            // When aggregation is any, badge should be issued regardless of invalid criteria.
+            array(BADGE_CRITERIA_AGGREGATION_ANY, 1),
+        );
+    }
+
+    /**
+     * @dataProvider data_for_invalid_criteria_test
+     */
+    public function test_badge_with_invalid_criteria($aggmethod, $awardcount) {
+        global $CFG, $DB;
+        require_once($CFG->dirroot . '/badges/lib/awardlib.php');
+        $badge = new badge($this->badgeid);
+        $criteria_overall = award_criteria::build(array('criteriatype' => 'overall', 'badgeid' => $badge->id));
+        $criteria_overall->save(array('agg' => $aggmethod));
+
+        // Create a badge with 'manual' criteria.
+        $roleid = $DB->get_field('role', 'id', array('shortname' => 'manager'));
+        $criteria_manual = award_criteria::build(array('criteriatype' => 'manual', 'badgeid' => $badge->id));
+        $params = array('agg' => BADGE_CRITERIA_AGGREGATION_ALL, 'role_' . $roleid => $roleid);
+        $criteria_manual->save($params);
+
+        // Activate the badge.
+        $badge->set_status(BADGE_STATUS_ACTIVE);
+
+        // Manually add an invalid criteria type to this badge.
+        $badcriteria = new stdClass();
+        $badcriteria->badgeid = $badge->id;
+        $badcriteria->criteriatype = 'badtype';
+        $badcriteria->method = 1;
+        $DB->insert_record('badge_criteria', $badcriteria);
+
+        list($badge->criteria, $badge->invalidcriteria) = $badge->get_criteria();
+
+        // Now award manual criterion and see if the overall badge is awarded.
+        $user1 = $this->getDataGenerator()->create_user();
+        $user2 = $this->getDataGenerator()->create_user();
+        if (process_manual_award($user1->id, $user2->id, $roleid, $badge->id)) {
+            $data = new stdClass();
+            $data->crit = $badge->criteria['manual'];
+            $data->userid = $user1->id;
+            badges_award_handle_manual_criteria_review($data, true);
+        }
+
+        $this->assertCount($awardcount, $badge->get_awards());
+    }
+
     public function data_for_message_from_template() {
         return array(
             array(
