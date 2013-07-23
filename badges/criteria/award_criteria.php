@@ -39,6 +39,9 @@ abstract class award_criteria {
     /* @var array Supported badge types (e.g. BADGE_TYPE_COURSE, BADGE_TYPE_SITE) */
     public static $supportedtypes = array();
 
+    public $required_param = null;
+    public $optional_params = array();
+
     /**
      * The base constructor
      *
@@ -219,7 +222,7 @@ abstract class award_criteria {
         }
         echo $OUTPUT->heading($this->get_title() . $OUTPUT->help_icon('pluginname', 'badgecriteria_' . $this->criteriatype), 3, 'main help');
 
-        if (!empty($this->params)) {
+        if (isset($this->params)) {
             if (count($this->params) > 1) {
                 echo $OUTPUT->box(get_string('description', 'badgecriteria_' . $this->criteriatype,
                         strtoupper($agg[$badge->get_aggregation_method($this->criteriatype)])), array('clearfix'));
