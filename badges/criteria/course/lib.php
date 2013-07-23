@@ -75,7 +75,7 @@ class award_criteria_course extends award_criteria {
      * @return string
      */
     public function get_details($short = false) {
-        global $DB;
+        global $DB, $OUTPUT;
         $param = reset($this->params);
 
         $course = $DB->get_record('course', array('id' => $param['course']));
