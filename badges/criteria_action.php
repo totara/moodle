@@ -73,12 +73,14 @@ if ($delete && has_capability('moodle/badges:configurecriteria', $context)) {
     }
 
     require_sesskey();
-    if (count($badge->criteria) == 2) {
+    if ($badge->has_one_criterion()) {
         // Remove overall criterion as well.
-        $badge->criteria[$type]->delete();
         $badge->criteria['overall']->delete();
-    } else {
+    }
+    if (isset($badge->criteria[$type])) {
         $badge->criteria[$type]->delete();
+    } else {
+        $badge->delete_invalid_criteria($type);
     }
     redirect($return);
 }

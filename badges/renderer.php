@@ -651,13 +651,19 @@ class core_badges_renderer extends plugin_renderer_base {
             $table = new html_table();
             $table->attributes['class'] = 'boxaligncenter statustable';
 
-            if (!$badge->has_criteria()) {
+            if (!$badge->has_criteria() || $badge->has_invalid_criteria()) {
                 $criteriaurl = new moodle_url('/badges/criteria.php', array('id' => $badge->id));
-                $status = get_string('nocriteria', 'badges');
+                if ($badge->has_invalid_criteria()) {
+                    $status = get_string('invalidcriteria', 'badges');
+                    $buttontext = get_string('fixcriteria', 'badges');
+                } else {
+                    $status = get_string('nocriteria', 'badges');
+                    $buttontext = get_string('addcriteria', 'badges');
+                }
                 if ($this->page->url != $criteriaurl) {
                     $action = $this->output->single_button(
                         $criteriaurl,
-                        get_string('addcriteria', 'badges'), 'POST', array('class' => 'activatebadge'));
+                        $buttontext, 'POST', array('class' => 'activatebadge'));
                 } else {
                     $action = '';
                 }
@@ -691,9 +697,9 @@ class core_badges_renderer extends plugin_renderer_base {
         $output = "";
         $shortstr = $short ? '_short' : '';
         $agg = $badge->get_aggregation_methods();
-        if (empty($badge->criteria)) {
+        if (!$badge->has_criteria()) {
             return get_string('nocriteria', 'badges');
-        } else if (count($badge->criteria) == 2) {
+        } else if ($badge->has_one_criterion()) {
             if (!$short) {
                 $output .= get_string('criteria_descr', 'badges');
             }
@@ -703,6 +709,10 @@ class core_badges_renderer extends plugin_renderer_base {
         }
         $items = array();
         unset($badge->criteria['overall']);
+        foreach ($badge->invalidcriteria as $invalid) {
+            $items[] = html_writer::tag('span', get_string('invalidcriteria_descr' . $shortstr, 'badges', $invalid),
+                array('class' => 'red'));
+        }
         foreach ($badge->criteria as $type => $c) {
             if (count($c->params) == 1) {
                 $items[] = get_string('description_single' . $shortstr, 'badgecriteria_' . $type) . $c->get_details($short);

@@ -102,7 +102,7 @@ abstract class award_criteria {
      * Factory method for creating criteria class object
      *
      * @param array $params associative arrays varname => value
-     * @return award_criteria
+     * @return award_criteria|false
      */
     public static function build($params) {
         global $CFG;
@@ -111,7 +111,12 @@ abstract class award_criteria {
         $criteriatype = isset($params['criteriatype']) ? $params['criteriatype'] : null;
 
         if (!in_array($criteriatype, $allcriteria)) {
-            print_error('error:invalidcriteriatype', 'badges');
+            // Criteria types are plugins but the 'overall' type is always required.
+            if ($criteriatype == 'overall') {
+                print_error('error:missingoverallcriteriatype', 'badges');
+            } else {
+                return false;
+            }
         }
 
         $libfile = $CFG->dirroot . "/badges/criteria/{$criteriatype}/lib.php";
@@ -223,6 +228,28 @@ abstract class award_criteria {
             }
             echo $OUTPUT->box($this->get_details(), array('clearfix'));
         }
+        echo $OUTPUT->box_end();
+    }
+
+    /**
+     * Add form elements for an invalid criterion
+     *
+     * @param badge $badge Badge being edited.
+     * @param string $name Name of the invalid criterion type
+     */
+    public static function config_form_invalid_criteria(badge $badge, $name) {
+        global $OUTPUT;
+        $deleteurl = new moodle_url('/badges/criteria_action.php',
+                array('badgeid' => $badge->id, 'delete' => true, 'type' => $name));
+        $deleteaction = $OUTPUT->action_icon($deleteurl, new pix_icon('t/delete', get_string('delete')), null,
+                array('class' => 'criteria-action'));
+        echo $OUTPUT->box_start();
+        if (!$badge->is_locked() && !$badge->is_active()) {
+            echo $OUTPUT->box($deleteaction, array('criteria-header'));
+        }
+
+        echo html_writer::tag('span', get_string('invalidcriteria_descr_full', 'badges', $name), array('class' => 'red'));
+
         echo $OUTPUT->box_end();
     }
 

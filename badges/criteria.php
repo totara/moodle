@@ -96,6 +96,9 @@ if (!$badge->is_locked() && !$badge->is_active()) {
 if ($badge->has_criteria()) {
     uksort($badge->criteria, 'award_criteria::criteria_sort');
 
+    foreach ($badge->invalidcriteria as $invalid) {
+        award_criteria::config_form_invalid_criteria($badge, $invalid);
+    }
     foreach ($badge->criteria as $crit) {
         $crit->config_form_criteria($badge);
     }

@@ -142,6 +142,9 @@ if ($activate) {
     if (!$badge->has_criteria()) {
         echo $OUTPUT->notification(get_string('error:cannotact', 'badges') . get_string('nocriteria', 'badges'));
         echo $OUTPUT->continue_button($returnurl);
+    } else if ($badge->has_invalid_criteria()) {
+        echo $OUTPUT->notification(get_string('error:cannotact', 'badges') . get_string('invalidcriteria', 'badges'));
+        echo $OUTPUT->continue_button($returnurl);
     } else {
         $message = get_string('reviewconfirm', 'badges', $badge->name);
         echo $OUTPUT->confirm($message, $url, $returnurl);

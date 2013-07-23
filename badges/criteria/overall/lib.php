@@ -45,7 +45,7 @@ class award_criteria_overall extends award_criteria {
     public function config_form_criteria(badge $badge) {
         global $OUTPUT;
         $prefix = 'criteria-' . $this->id;
-        if (count($badge->criteria) > 2) {
+        if ($badge->has_criteria() && !$badge->has_one_criterion()) {
             echo $OUTPUT->box_start();
             echo $OUTPUT->heading($this->get_title(), 2);
 
@@ -109,15 +109,17 @@ class award_criteria_overall extends award_criteria {
         $criteria = $DB->get_records_sql($sql, $params);
         $overall = false;
         foreach ($criteria as $crit) {
+            // Check the award criteria exists.
+            $critobj = award_criteria::build((array)$crit);
             if ($this->method == BADGE_CRITERIA_AGGREGATION_ALL) {
-                if ($crit->datemet === null) {
+                if (!$critobj || $crit->datemet === null) {
                     return false;
                 } else {
                     $overall = true;
                     continue;
                 }
             } else if ($this->method == BADGE_CRITERIA_AGGREGATION_ANY) {
-                if ($crit->datemet === null) {
+                if (!$critobj || $crit->datemet === null) {
                     $overall = false;
                     continue;
                 } else {
