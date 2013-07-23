@@ -195,11 +195,11 @@ abstract class award_criteria {
     /**
      * Add appropriate criteria elements
      *
-     * @param stdClass $data details of various criteria
+     * @param badge $badge Badge being edited
      */
-    public function config_form_criteria($data) {
+    public function config_form_criteria(badge $badge) {
         global $OUTPUT;
-        $agg = $data->get_aggregation_methods();
+        $agg = $badge->get_aggregation_methods();
 
         $editurl = new moodle_url('/badges/criteria_settings.php',
                 array('badgeid' => $this->badgeid, 'edit' => true, 'type' => $this->criteriatype, 'crit' => $this->id));
@@ -209,7 +209,7 @@ abstract class award_criteria {
         $deleteaction = $OUTPUT->action_icon($deleteurl, new pix_icon('t/delete', get_string('delete')), null, array('class' => 'criteria-action'));
 
         echo $OUTPUT->box_start();
-        if (!$data->is_locked() && !$data->is_active()) {
+        if (!$badge->is_locked() && !$badge->is_active()) {
             echo $OUTPUT->box($deleteaction . $editaction, array('criteria-header'));
         }
         echo $OUTPUT->heading($this->get_title() . $OUTPUT->help_icon('pluginname', 'badgecriteria_' . $this->criteriatype), 3, 'main help');
@@ -217,7 +217,7 @@ abstract class award_criteria {
         if (!empty($this->params)) {
             if (count($this->params) > 1) {
                 echo $OUTPUT->box(get_string('description', 'badgecriteria_' . $this->criteriatype,
-                        strtoupper($agg[$data->get_aggregation_method($this->criteriatype)])), array('clearfix'));
+                        strtoupper($agg[$badge->get_aggregation_method($this->criteriatype)])), array('clearfix'));
             } else {
                 echo $OUTPUT->box(get_string('description_single', 'badgecriteria_' . $this->criteriatype), array('clearfix'));
             }

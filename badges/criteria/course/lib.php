@@ -47,9 +47,9 @@ class award_criteria_course extends award_criteria {
      * Add appropriate form elements to the criteria form
      *
      * @param moodleform $mform  Moodle forms object
-     * @param stdClass $data details of various modules
+     * @param badge $badge Badge being edited
      */
-    public function config_form_criteria($data) {
+    public function config_form_criteria(badge $badge) {
         global $OUTPUT;
 
         $editurl = new moodle_url('/badges/criteria_settings.php', array('badgeid' => $this->badgeid, 'edit' => true, 'type' => $this->criteriatype, 'crit' => $this->id));
@@ -58,7 +58,7 @@ class award_criteria_course extends award_criteria {
         $deleteaction = $OUTPUT->action_icon($deleteurl, new pix_icon('t/delete', get_string('delete')), null, array('class' => 'criteria-action'));
 
         echo $OUTPUT->box_start();
-        if (!$data->is_locked() && !$data->is_active()) {
+        if (!$badge->is_locked() && !$badge->is_active()) {
             echo $OUTPUT->box($deleteaction . $editaction, array('criteria-header'));
         }
         echo $OUTPUT->heading($this->get_title() . $OUTPUT->help_icon('pluginname', 'badgecriteria_' . $this->criteriatype), 3, 'main help');

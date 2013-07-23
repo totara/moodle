@@ -40,29 +40,29 @@ class award_criteria_overall extends award_criteria {
     /**
      * Add appropriate form elements to the criteria form
      *
-     * @param stdClass $data details of overall criterion
+     * @param badge $badge Badge being edited
      */
-    public function config_form_criteria($data) {
+    public function config_form_criteria(badge $badge) {
         global $OUTPUT;
         $prefix = 'criteria-' . $this->id;
-        if (count($data->criteria) > 2) {
+        if (count($badge->criteria) > 2) {
             echo $OUTPUT->box_start();
             echo $OUTPUT->heading($this->get_title(), 2);
 
-            $agg = $data->get_aggregation_methods();
-            if (!$data->is_locked() && !$data->is_active()) {
-                $url = new moodle_url('criteria.php', array('id' => $data->id, 'sesskey' => sesskey()));
+            $agg = $badge->get_aggregation_methods();
+            if (!$badge->is_locked() && !$badge->is_active()) {
+                $url = new moodle_url('criteria.php', array('id' => $badge->id, 'sesskey' => sesskey()));
                 $table = new html_table();
                 $table->attributes = array('class' => 'clearfix');
                 $table->colclasses = array('', 'activatebadge');
                 $table->data[] = array(
-                        $OUTPUT->single_select($url, 'update', $agg, $data->get_aggregation_method($this->criteriatype), null),
+                        $OUTPUT->single_select($url, 'update', $agg, $badge->get_aggregation_method($this->criteriatype), null),
                         get_string('overallcrit', 'badges')
                         );
                 echo html_writer::table($table);
             } else {
                 echo $OUTPUT->box(get_string('description', 'badgecriteria_' . $this->criteriatype,
-                        strtoupper($agg[$data->get_aggregation_method()])), 'clearfix');
+                        strtoupper($agg[$badge->get_aggregation_method()])), 'clearfix');
             }
             echo $OUTPUT->box_end();
         }
