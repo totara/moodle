@@ -18,9 +18,10 @@
 /**
  * Strings for component 'badgecriteria_course'
  *
- * @package   badgecriteria_course
- * @copyright 1999 onwards Martin Dougiamas  {@link http://moodle.com}
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package    badgecriteria_course
+ * @copyright  2012 onwards Totara Learning Solutions Ltd {@link http://www.totaralms.com/}
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @author     Yuliya Bozhko <yuliya.bozhko@totaralms.com>
  */
 
 $string['completionnotenabled'] = 'Course completion is not enabled for this course, so it cannot be included in badge criteria. Course completion may be enabled in the course settings.';
