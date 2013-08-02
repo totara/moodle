@@ -63,21 +63,7 @@ abstract class award_criteria {
      */
     public static function get_all_criteria() {
         global $CFG;
-        $criteriadirectory = $CFG->dirroot . '/badges/criteria/';
-        $files = scandir($criteriadirectory);
-        $criteria = array();
-        foreach ($files as $file) {
-            // Exclude current and parent directories.
-            if ($file == '.' || $file == '..') {
-                continue;
-            }
-            // Must be a directory containing a lib.php file.
-            $libfile = "{$criteriadirectory}/{$file}/lib.php";
-            if (!file_exists($libfile)) {
-                continue;
-            }
-            $criteria[] = $file;
-        }
+        $criteria = array_keys(core_component::get_plugin_list('badgecriteria'));
         usort($criteria, 'self::criteria_sort');
         return $criteria;
     }
