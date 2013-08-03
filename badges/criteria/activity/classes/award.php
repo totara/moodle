@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This file contains the activity badge award criteria type class
+ * This file contains the activity badge criteria award class
  *
  * @package    core
  * @subpackage badges
@@ -31,9 +31,9 @@ require_once($CFG->libdir . '/completionlib.php');
  * Badge award criteria -- award on activity completion
  *
  */
-class award_criteria_activity extends award_criteria {
+class badgecriteria_activity_award extends badgecriteria_award {
 
-    /* @var int Criteria ['activity'] */
+    /* @var string Criteria ['activity'] */
     public $criteriatype = 'activity';
     /* @var array Supported badge types */
     public static $supportedtypes = array(BADGE_TYPE_COURSE);

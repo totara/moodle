@@ -72,7 +72,7 @@ $cparams = array('criteriatype' => $type, 'badgeid' => $badge->id);
 if ($edit) {
     $criteria = $badge->criteria[$type];
 } else {
-    $criteria = award_criteria::build($cparams);
+    $criteria = badgecriteria_award::build($cparams);
 }
 
 $mform = new edit_criteria_form($FULLME, array('criteria' => $criteria, 'addcourse' => $addcourse, 'course' => $badge->courseid));
@@ -81,7 +81,7 @@ if (!empty($addcourse)) {
     if ($data = $mform->get_data()) {
         // If no criteria yet, add overall aggregation.
         if (!$badge->has_criteria()) {
-            $criteria_overall = award_criteria::build(array('criteriatype' => 'overall', 'badgeid' => $badge->id));
+            $criteria_overall = badgecriteria_award::build(array('criteriatype' => 'overall', 'badgeid' => $badge->id));
             $criteria_overall->save(array('agg' => BADGE_CRITERIA_AGGREGATION_ALL));
         }
 
@@ -92,7 +92,7 @@ if (!empty($addcourse)) {
 } else if ($data = $mform->get_data()) {
     // If no criteria yet, add overall aggregation.
     if (!$badge->has_criteria()) {
-        $criteria_overall = award_criteria::build(array('criteriatype' => 'overall', 'badgeid' => $badge->id));
+        $criteria_overall = badgecriteria_award::build(array('criteriatype' => 'overall', 'badgeid' => $badge->id));
         $criteria_overall->save(array('agg' => BADGE_CRITERIA_AGGREGATION_ALL));
     }
     $criteria->save($data);

@@ -26,8 +26,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-/* Include required award criteria library. */
-require_once($CFG->dirroot . '/badges/criteria/award_criteria.php');
+/* Include required badgecriteria_award library. */
+require_once($CFG->dirroot . '/badges/criteria/badgecriteria_award.php');
 
 /*
  * Number of records per page.
@@ -183,13 +183,10 @@ class badge {
      */
     public function get_accepted_criteria() {
         $criteriatypes = array();
-        $allcriteria = award_criteria::get_all_criteria();
+        $allcriteria = badgecriteria_award::get_all_criteria();
 
         foreach ($allcriteria as $criterianame) {
-            global $CFG;
-            $libfile = $CFG->dirroot . "/badges/criteria/{$criterianame}/lib.php";
-            require_once($libfile);
-            $class = "award_criteria_{$criterianame}";
+            $class = "badgecriteria_{$criterianame}_award";
             if (in_array($this->type, $class::$supportedtypes)) {
                 $criteriatypes[] = $criterianame;
             }
@@ -548,7 +545,7 @@ class badge {
 
         if ($records = (array)$DB->get_records('badge_criteria', array('badgeid' => $this->id))) {
             foreach ($records as $record) {
-                if ($criteriaobj = award_criteria::build((array)$record)) {
+                if ($criteriaobj = badgecriteria_award::build((array)$record)) {
                     $criteria[$record->criteriatype] = $criteriaobj;
                 } else {
                     $invalidcriteria[] = $record->criteriatype;

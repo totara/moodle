@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This file contains the manual badge award criteria type class
+ * This file contains the profile completion badge criteria award class
  *
  * @package    core
  * @subpackage badges
@@ -25,75 +25,85 @@
  */
 
 defined('MOODLE_INTERNAL') || die();
+require_once($CFG->dirroot . "/user/lib.php");
 
 /**
- * Manual badge award criteria
+ * Profile completion badge award criteria
  *
  */
-class award_criteria_manual extends award_criteria {
+class badgecriteria_profile_award extends badgecriteria_award {
 
-    /* @var int Criteria ['manual'] */
-    public $criteriatype = 'manual';
+    /* @var string Criteria ['profile'] */
+    public $criteriatype = 'profile';
     /* @var array Supported badge types */
-    public static $supportedtypes = array(BADGE_TYPE_COURSE, BADGE_TYPE_SITE);
+    public static $supportedtypes = array(BADGE_TYPE_SITE);
 
-    public $required_param = 'role';
+    public $required_param = 'field';
     public $optional_params = array();
-
-    /**
-     * Gets role name.
-     * If no such role exists this function returns null.
-     *
-     * @return string|null
-     */
-    private function get_role_name($rid) {
-        global $DB, $PAGE;
-        $rec = $DB->get_record('role', array('id' => $rid));
-
-        if ($rec) {
-            return role_get_name($rec, $PAGE->context, ROLENAME_ALIAS);
-        } else {
-            return null;
-        }
-    }
 
     /**
      * Add appropriate new criteria options to the form
      *
      */
     public function get_options(&$mform) {
-        global $PAGE;
-        $options = '';
-        $none = true;
+        global $DB;
 
-        $roles = get_roles_with_capability('moodle/badges:awardbadge', CAP_ALLOW, $PAGE->context);
-        $roleids = array_map(create_function('$o', 'return $o->id;'), $roles);
+        $none = true;
         $existing = array();
         $missing = array();
 
+        // Note: cannot use user_get_default_fields() here because it is not possible to decide which fields user can modify.
+        $dfields = array('firstname', 'lastname', 'email', 'address', 'phone1', 'phone2', 'icq', 'skype', 'yahoo',
+                         'aim', 'msn', 'department', 'institution', 'description', 'city', 'url', 'country');
+
+        $sql = "SELECT uf.id as fieldid, uf.name as name, ic.id as categoryid, ic.name as categoryname, uf.datatype
+                FROM {user_info_field} uf
+                JOIN {user_info_category} ic
+                ON uf.categoryid = ic.id AND uf.visible <> 0
+                ORDER BY ic.sortorder ASC, uf.sortorder ASC";
+
+        // Get custom fields.
+        $cfields = $DB->get_records_sql($sql);
+        $cfids = array_map(create_function('$o', 'return $o->fieldid;'), $cfields);
+
         if ($this->id !== 0) {
             $existing = array_keys($this->params);
-            $missing = array_diff($existing, $roleids);
+            $missing = array_diff($existing, array_merge($dfields, $cfids));
         }
 
         if (!empty($missing)) {
             $mform->addElement('header', 'category_errors', get_string('criterror', 'badges'));
             $mform->addHelpButton('category_errors', 'criterror', 'badges');
             foreach ($missing as $m) {
-                $this->config_options($mform, array('id' => $m, 'checked' => true, 'name' => get_string('error:nosuchrole', 'badgecriteria_manual'), 'error' => true));
+                $this->config_options($mform, array('id' => $m, 'checked' => true, 'name' => get_string('error:nosuchfield', 'badgecriteria_profile'), 'error' => true));
                 $none = false;
             }
         }
 
-        if (!empty($roleids)) {
+        if (!empty($dfields)) {
             $mform->addElement('header', 'first_header', $this->get_title());
             $mform->addHelpButton('first_header', 'pluginname', 'badgecriteria_' . $this->criteriatype);
-            foreach ($roleids as $rid) {
+            foreach ($dfields as $field) {
                 $checked = false;
-                if (in_array($rid, $existing)) {
+                if (in_array($field, $existing)) {
                     $checked = true;
                 }
-                $this->config_options($mform, array('id' => $rid, 'checked' => $checked, 'name' => self::get_role_name($rid), 'error' => false));
+                $this->config_options($mform, array('id' => $field, 'checked' => $checked, 'name' => get_user_field_name($field), 'error' => false));
+                $none = false;
+            }
+        }
+
+        if (!empty($cfields)) {
+            foreach ($cfields as $field) {
+                if (!isset($currentcat) || $currentcat != $field->categoryid) {
+                    $currentcat = $field->categoryid;
+                    $mform->addElement('header', 'category_' . $currentcat, format_string($field->categoryname));
+                }
+                $checked = false;
+                if (in_array($field->fieldid, $existing)) {
+                    $checked = true;
+                }
+                $this->config_options($mform, array('id' => $field->fieldid, 'checked' => $checked, 'name' => $field->name, 'error' => false));
                 $none = false;
             }
         }
@@ -102,9 +112,9 @@ class award_criteria_manual extends award_criteria {
         if (!$none) {
             $mform->addElement('header', 'aggregation', get_string('method', 'badges'));
             $agg = array();
-            $agg[] =& $mform->createElement('radio', 'agg', '', get_string('allmethod', 'badgecriteria_manual'), 1);
+            $agg[] =& $mform->createElement('radio', 'agg', '', get_string('allmethod', 'badgecriteria_profile'), 1);
             $agg[] =& $mform->createElement('static', 'none_break', null, '<br/>');
-            $agg[] =& $mform->createElement('radio', 'agg', '', get_string('anymethod', 'badgecriteria_manual'), 2);
+            $agg[] =& $mform->createElement('radio', 'agg', '', get_string('anymethod', 'badgecriteria_profile'), 2);
             $mform->addGroup($agg, 'methodgr', '', array(' '), false);
             if ($this->id !== 0) {
                 $mform->setDefault('agg', $this->method);
@@ -122,12 +132,16 @@ class award_criteria_manual extends award_criteria {
      * @return string
      */
     public function get_details($short = false) {
-        global $OUTPUT;
+        global $DB, $OUTPUT;
         $output = array();
         foreach ($this->params as $p) {
-            $str = self::get_role_name($p['role']);
+            if (is_numeric($p['field'])) {
+                $str = $DB->get_field('user_info_field', 'name', array('id' => $p['field']));
+            } else {
+                $str = get_user_field_name($p['field']);
+            }
             if (!$str) {
-                $output[] = $OUTPUT->error_text(get_string('error:nosuchrole', 'badgecriteria_manual'));
+                $output[] = $OUTPUT->error_text(get_string('error:nosuchfield', 'badgecriteria_profile'));
             } else {
                 $output[] = $str;
             }
@@ -151,7 +165,12 @@ class award_criteria_manual extends award_criteria {
 
         $overall = false;
         foreach ($this->params as $param) {
-            $crit = $DB->get_record('badge_manual_award', array('issuerrole' => $param['role'], 'recipientid' => $userid, 'badgeid' => $this->badgeid));
+            if (is_numeric($param['field'])) {
+                $crit = $DB->get_field('user_info_data', 'data', array('userid' => $userid, 'fieldid' => $param['field']));
+            } else {
+                $crit = $DB->get_field('user', $param['field'], array('id' => $userid));
+            }
+
             if ($this->method == BADGE_CRITERIA_AGGREGATION_ALL) {
                 if (!$crit) {
                     return false;
@@ -169,18 +188,5 @@ class award_criteria_manual extends award_criteria {
             }
         }
         return $overall;
-    }
-
-    /**
-     * Delete this criterion
-     *
-     */
-    public function delete() {
-        global $DB;
-
-        // Remove any records of manual award.
-        $DB->delete_records('badge_manual_award', array('badgeid' => $this->badgeid));
-
-        parent::delete();
     }
 }

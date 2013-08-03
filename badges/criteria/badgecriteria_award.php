@@ -30,7 +30,7 @@ defined('MOODLE_INTERNAL') || die();
  * Award criteria abstract definition
  *
  */
-abstract class award_criteria {
+abstract class badgecriteria_award {
 
     public $id;
     public $method;
@@ -91,7 +91,7 @@ abstract class award_criteria {
      * Factory method for creating criteria class object
      *
      * @param array $params associative arrays varname => value
-     * @return award_criteria|false
+     * @return badgecriteria_award|false
      */
     public static function build($params) {
         global $CFG;
@@ -108,9 +108,7 @@ abstract class award_criteria {
             }
         }
 
-        $libfile = $CFG->dirroot . "/badges/criteria/{$criteriatype}/lib.php";
-        require_once($libfile);
-        $class = "award_criteria_{$criteriatype}";
+        $class = "badgecriteria_{$criteriatype}_award";
         return new $class($params);
     }
 

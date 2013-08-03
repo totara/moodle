@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This file contains the course completion badge award criteria type class
+ * This file contains the course completion badge criteria award class
  *
  * @package    core
  * @subpackage badges
@@ -25,6 +25,7 @@
  */
 
 defined('MOODLE_INTERNAL') || die();
+global $CFG;
 require_once($CFG->libdir . '/completionlib.php');
 require_once($CFG->dirroot . '/grade/querylib.php');
 require_once($CFG->libdir . '/gradelib.php');
@@ -33,9 +34,9 @@ require_once($CFG->libdir . '/gradelib.php');
  * Badge award criteria -- award on course completion
  *
  */
-class award_criteria_course extends award_criteria {
+class badgecriteria_course_award extends badgecriteria_award {
 
-    /* @var int Criteria ['course'] */
+    /* @var string Criteria ['course'] */
     public $criteriatype = 'course';
     /* @var array Supported badge types */
     public static $supportedtypes = array(BADGE_TYPE_COURSE);

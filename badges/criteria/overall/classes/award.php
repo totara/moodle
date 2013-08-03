@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This file contains the overall badge award criteria type
+ * This file contains the overall badge criteria award class
  *
  * @package    core
  * @subpackage badges
@@ -30,9 +30,9 @@ defined('MOODLE_INTERNAL') || die();
  * Overall badge award criteria
  *
  */
-class award_criteria_overall extends award_criteria {
+class badgecriteria_overall_award extends badgecriteria_award {
 
-    /* @var int Criteria ['overall'] */
+    /* @var string Criteria ['overall'] */
     public $criteriatype = 'overall';
     /* @var array Supported badge types */
     public static $supportedtypes = array(BADGE_TYPE_COURSE, BADGE_TYPE_SITE);
@@ -110,7 +110,7 @@ class award_criteria_overall extends award_criteria {
         $overall = false;
         foreach ($criteria as $crit) {
             // Check the award criteria exists.
-            $critobj = award_criteria::build((array)$crit);
+            $critobj = badgecriteria_award::build((array)$crit);
             if ($this->method == BADGE_CRITERIA_AGGREGATION_ALL) {
                 if (!$critobj || $crit->datemet === null) {
                     return false;

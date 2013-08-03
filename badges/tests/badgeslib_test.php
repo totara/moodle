@@ -131,13 +131,13 @@ class core_badgeslib_testcase extends advanced_testcase {
 
     public function test_create_badge_criteria() {
         $badge = new badge($this->badgeid);
-        $criteria_overall = award_criteria::build(array('criteriatype' => 'overall', 'badgeid' => $badge->id));
+        $criteria_overall = badgecriteria_award::build(array('criteriatype' => 'overall', 'badgeid' => $badge->id));
         $criteria_overall->save(array('agg' => BADGE_CRITERIA_AGGREGATION_ALL));
 
         list($validcriteria, $invalidcriteria) = $badge->get_criteria();
         $this->assertCount(1, $validcriteria);
 
-        $criteria_profile = award_criteria::build(array('criteriatype' => 'profile', 'badgeid' => $badge->id));
+        $criteria_profile = badgecriteria_award::build(array('criteriatype' => 'profile', 'badgeid' => $badge->id));
         $params = array('agg' => BADGE_CRITERIA_AGGREGATION_ALL, 'field_address' => 'address');
         $criteria_profile->save($params);
 
@@ -146,11 +146,11 @@ class core_badgeslib_testcase extends advanced_testcase {
     }
 
     public function test_delete_badge_criteria() {
-        $criteria_overall = award_criteria::build(array('criteriatype' => 'overall', 'badgeid' => $this->badgeid));
+        $criteria_overall = badgecriteria_award::build(array('criteriatype' => 'overall', 'badgeid' => $this->badgeid));
         $criteria_overall->save(array('agg' => BADGE_CRITERIA_AGGREGATION_ALL));
         $badge = new badge($this->badgeid);
 
-        $this->assertInstanceOf('award_criteria_overall', $badge->criteria['overall']);
+        $this->assertInstanceOf('badgecriteria_overall_award', $badge->criteria['overall']);
 
         $badge->criteria['overall']->delete();
         list($validcriteria, $invalidcriteria) = $badge->get_criteria();
@@ -187,12 +187,12 @@ class core_badgeslib_testcase extends advanced_testcase {
         global $CFG, $DB;
         require_once($CFG->dirroot . '/badges/lib/awardlib.php');
         $badge = new badge($this->badgeid);
-        $criteria_overall = award_criteria::build(array('criteriatype' => 'overall', 'badgeid' => $badge->id));
+        $criteria_overall = badgecriteria_award::build(array('criteriatype' => 'overall', 'badgeid' => $badge->id));
         $criteria_overall->save(array('agg' => $aggmethod));
 
         // Create a badge with 'manual' criteria.
         $roleid = $DB->get_field('role', 'id', array('shortname' => 'manager'));
-        $criteria_manual = award_criteria::build(array('criteriatype' => 'manual', 'badgeid' => $badge->id));
+        $criteria_manual = badgecriteria_award::build(array('criteriatype' => 'manual', 'badgeid' => $badge->id));
         $params = array('agg' => BADGE_CRITERIA_AGGREGATION_ALL, 'role_' . $roleid => $roleid);
         $criteria_manual->save($params);
 
