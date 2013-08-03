@@ -711,7 +711,7 @@ class core_badges_renderer extends plugin_renderer_base {
         unset($badge->criteria['overall']);
         foreach ($badge->invalidcriteria as $invalid) {
             $items[] = html_writer::tag('span', get_string('invalidcriteria_descr' . $shortstr, 'badges', $invalid),
-                array('class' => 'red'));
+                array('class' => 'badge-error'));
         }
         foreach ($badge->criteria as $type => $c) {
             if (count($c->params) == 1) {

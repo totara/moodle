@@ -235,7 +235,7 @@ abstract class badgecriteria_award {
             echo $OUTPUT->box($deleteaction, array('criteria-header'));
         }
 
-        echo html_writer::tag('span', get_string('invalidcriteria_descr_full', 'badges', $name), array('class' => 'red'));
+        echo html_writer::tag('span', get_string('invalidcriteria_descr_full', 'badges', $name), array('class' => 'badge-error'));
 
         echo $OUTPUT->box_end();
     }

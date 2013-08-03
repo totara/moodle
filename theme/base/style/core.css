@@ -1383,7 +1383,7 @@ div.badge .expireimage { width: 100px; height: 100px; left: 20px; top: 0px; }
 
 .badge-profile { vertical-align: top; }
 .connected { color: #006600; }
-.notconnected { color: #660000; }
+.notconnected, .badge-error { color: #660000; }
 
 #page-badges-award .recipienttable { background-color: #EEEEEE; border: 1px solid #BBBBBB; width: 100%; vertical-align: top; }
 #page-badges-award .recipienttable tr td { vertical-align: top; }
