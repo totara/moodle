@@ -532,21 +532,6 @@
         <INDEX NAME="filter_md5key" UNIQUE="false" FIELDS="filter, md5key"/>
       </INDEXES>
     </TABLE>
-    <TABLE NAME="cache_text" COMMENT="For storing temporary copies of processed texts">
-      <FIELDS>
-        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="md5key" TYPE="char" LENGTH="32" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="formattedtext" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
-      </FIELDS>
-      <KEYS>
-        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-      </KEYS>
-      <INDEXES>
-        <INDEX NAME="md5key" UNIQUE="false" FIELDS="md5key"/>
-        <INDEX NAME="timemodified" UNIQUE="false" FIELDS="timemodified" COMMENT="Mainly to help deletion of expired records from cron"/>
-      </INDEXES>
-    </TABLE>
     <TABLE NAME="log" COMMENT="Every action is logged as far as possible">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>

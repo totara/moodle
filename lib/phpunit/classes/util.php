@@ -197,7 +197,7 @@ class phpunit_util extends testing_util {
         \core\event\manager::phpunit_reset();
         accesslib_clear_all_caches(true);
         get_string_manager()->reset_caches(true);
-        reset_text_filters_cache(true);
+        reset_text_filters_cache();
         events_get_handlers('reset');
         core_text::reset_caches();
         if (class_exists('repository')) {

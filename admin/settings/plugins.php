@@ -135,7 +135,6 @@ if ($hassiteconfig) {
             0 => new lang_string('no')
         );
         $items = array();
-        $items[] = new admin_setting_configselect('cachetext', new lang_string('cachetext', 'admin'), new lang_string('configcachetext', 'admin'), 60, $cachetimes);
         $items[] = new admin_setting_configselect('filteruploadedfiles', new lang_string('filteruploadedfiles', 'admin'), new lang_string('configfilteruploadedfiles', 'admin'), 0,
                 array('0' => new lang_string('none'), '1' => new lang_string('allfiles'), '2' => new lang_string('htmlfilesonly')));
         $items[] = new admin_setting_configcheckbox('filtermatchoneperpage', new lang_string('filtermatchoneperpage', 'admin'), new lang_string('configfiltermatchoneperpage', 'admin'), 0);

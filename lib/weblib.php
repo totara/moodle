@@ -1054,7 +1054,6 @@ function format_text_menu() {
  *                      using htmlpurifier. Default false.
  * </pre>
  *
- * @staticvar array $croncache
  * @param string $text The text to be formatted. This is raw text originally from user input.
  * @param int $format Identifier of the text format to be used
  *            [FORMAT_MOODLE, FORMAT_HTML, FORMAT_PLAIN, FORMAT_MARKDOWN]
@@ -1064,7 +1063,6 @@ function format_text_menu() {
  */
 function format_text($text, $format = FORMAT_MOODLE, $options = null, $courseiddonotuse = null) {
     global $CFG, $DB, $PAGE;
-    static $croncache = array();
 
     if ($text === '' || is_null($text)) {
         // No need to do any filters and cleaning.
@@ -1133,32 +1131,17 @@ function format_text($text, $format = FORMAT_MOODLE, $options = null, $courseidd
         $filtermanager = new null_filter_manager();
     }
 
-    if (!empty($CFG->cachetext) and empty($options['nocache'])) {
+    if (empty($options['nocache'])) {
+        $cache = cache::make('core', 'formattext');
         $hashstr = $text.'-'.$filtermanager->text_filtering_hash($context).'-'.$context->id.'-'.current_language().'-'.
                 (int)$format.(int)$options['trusted'].(int)$options['noclean'].
                 (int)$options['para'].(int)$options['newlines'];
 
-        $time = time() - $CFG->cachetext;
         $md5key = md5($hashstr);
-        if (CLI_SCRIPT) {
-            if (isset($croncache[$md5key])) {
-                return $croncache[$md5key];
-            }
+        if ($cachedstring = $cache->get($md5key)) {
+            return $cachedstring;
         }
 
-        if ($oldcacheitem = $DB->get_record('cache_text', array('md5key' => $md5key), '*', IGNORE_MULTIPLE)) {
-            if ($oldcacheitem->timemodified >= $time) {
-                if (CLI_SCRIPT) {
-                    if (count($croncache) > 150) {
-                        reset($croncache);
-                        $key = key($croncache);
-                        unset($croncache[$key]);
-                    }
-                    $croncache[$md5key] = $oldcacheitem->formattedtext;
-                }
-                return $oldcacheitem->formattedtext;
-            }
-        }
     }
 
     switch ($format) {
@@ -1237,45 +1220,8 @@ function format_text($text, $format = FORMAT_MOODLE, $options = null, $courseidd
         $text = html_writer::tag('div', $text, array('class' => 'no-overflow'));
     }
 
-    if (empty($options['nocache']) and !empty($CFG->cachetext)) {
-        if (CLI_SCRIPT) {
-            // Special static cron cache - no need to store it in db if its not already there.
-            if (count($croncache) > 150) {
-                reset($croncache);
-                $key = key($croncache);
-                unset($croncache[$key]);
-            }
-            $croncache[$md5key] = $text;
-            return $text;
-        }
-
-        $newcacheitem = new stdClass();
-        $newcacheitem->md5key = $md5key;
-        $newcacheitem->formattedtext = $text;
-        $newcacheitem->timemodified = time();
-        if ($oldcacheitem) {
-            // See bug 4677 for discussion.
-            $newcacheitem->id = $oldcacheitem->id;
-            try {
-                // Update existing record in the cache table.
-                $DB->update_record('cache_text', $newcacheitem);
-            } catch (dml_exception $e) {
-                // It's unlikely that the cron cache cleaner could have
-                // deleted this entry in the meantime, as it allows
-                // some extra time to cover these cases.
-            }
-        } else {
-            try {
-                // Insert a new record in the cache table.
-                $DB->insert_record('cache_text', $newcacheitem);
-            } catch (dml_exception $e) {
-                // Again, it's possible that another user has caused this
-                // record to be created already in the time that it took
-                // to traverse this function.  That's OK too, as the
-                // call above handles duplicate entries, and eventually
-                // the cron cleaner will delete them.
-            }
-        }
+    if (empty($options['nocache'])) {
+        $cache->set($md5key, $text);
     }
 
     return $text;
@@ -1284,15 +1230,12 @@ function format_text($text, $format = FORMAT_MOODLE, $options = null, $courseidd
 /**
  * Resets all data related to filters, called during upgrade or when filter settings change.
  *
- * @param bool $phpunitreset true means called from our PHPUnit integration test reset
  * @return void
  */
-function reset_text_filters_cache($phpunitreset = false) {
-    global $CFG, $DB;
+function reset_text_filters_cache() {
+    global $CFG;
 
-    if (!$phpunitreset) {
-        $DB->delete_records('cache_text');
-    }
+    cache_helper::purge_by_definition('core', 'formattext');
 
     $purifdir = $CFG->cachedir.'/htmlpurifier';
     remove_dir($purifdir, true);

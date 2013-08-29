@@ -233,4 +233,9 @@ $definitions = array(
         'mode' => cache_store::MODE_REQUEST,
         'persistent' => true,
     ),
+    // Cache strings that have been passed through {@link format_text()}
+    'formattext' => array(
+        'mode' => cache_store::MODE_APPLICATION,
+        'simplekeys' => true,
+    ),
 );

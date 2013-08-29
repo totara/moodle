@@ -2327,5 +2327,19 @@ function xmldb_main_upgrade($oldversion) {
         upgrade_main_savepoint(true, 2013081200.00);
     }
 
+    if ($oldversion < 2013082900.00) {
+
+        // Define table cache_text to be dropped.
+        $table = new xmldb_table('cache_text');
+
+        // Conditionally launch drop table for cache_text.
+        if ($dbman->table_exists($table)) {
+            $dbman->drop_table($table);
+        }
+
+        // Main savepoint reached.
+        upgrade_main_savepoint(true, 2013082900.00);
+    }
+
     return true;
 }
