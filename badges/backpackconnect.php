@@ -45,9 +45,8 @@ $assertion = filter_input(
 );
 
 // Audience is the site url scheme + host + port only.
-$wwwparts = parse_url($CFG->wwwroot);
-$audience = $wwwparts['scheme'] . '://' . $wwwparts['host'];
-$audience .= isset($wwwparts['port']) ? $wwwparts['port'] : '';
+$wwwroot = new moodle_url($CFG->wwwroot);
+$audience = $wwwroot->get_host(true, true);
 $params = 'assertion=' . urlencode($assertion) . '&audience=' .
            urlencode($audience);
 

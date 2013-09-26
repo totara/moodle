@@ -106,9 +106,9 @@ function lti_view($instance) {
 
     //Default the organizationid if not specified
     if (empty($typeconfig['organizationid'])) {
-        $urlparts = parse_url($CFG->wwwroot);
+        $murl = new moodle_url($CFG->wwwroot);
 
-        $typeconfig['organizationid'] = $urlparts['host'];
+        $typeconfig['organizationid'] = $murl->get_host();
     }
 
     if (!empty($instance->resourcekey)) {
@@ -639,20 +639,15 @@ function lti_get_tool_by_url_match($url, $courseid = null, $state = LTI_TOOL_STA
 }
 
 function lti_get_url_thumbprint($url) {
-    $urlparts = parse_url(strtolower($url));
-    if (!isset($urlparts['path'])) {
-        $urlparts['path'] = '';
+    $murl = new moodle_url(strtolower($url));
+    $path = $murl->get_path();
+    $host = $murl->get_host();
+
+    if (substr($host, 0, 4) === 'www.') {
+        $host = substr($host, 4);
     }
 
-    if (!isset($urlparts['host'])) {
-        $urlparts['host'] = '';
-    }
-
-    if (substr($urlparts['host'], 0, 4) === 'www.') {
-        $urlparts['host'] = substr($urlparts['host'], 4);
-    }
-
-    return $urllower = $urlparts['host'] . '/' . $urlparts['path'];
+    return $host . '/' . $path;
 }
 
 function lti_get_best_tool_by_url($url, $tools, $courseid = null) {

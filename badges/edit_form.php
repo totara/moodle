@@ -110,8 +110,8 @@ class edit_details_form extends moodleform {
 
         // Set issuer URL.
         // Have to parse URL because badge issuer origin cannot be a subfolder in wwwroot.
-        $url = parse_url($CFG->wwwroot);
-        $mform->addElement('hidden', 'issuerurl', $url['scheme'] . '://' . $url['host']);
+        $murl = new moodle_url($CFG->wwwroot);
+        $mform->addElement('hidden', 'issuerurl', $url->get_host(true));
         $mform->setType('issuerurl', PARAM_URL);
 
         $mform->addElement('hidden', 'action', $action);

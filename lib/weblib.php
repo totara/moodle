@@ -835,14 +835,32 @@ class moodle_url {
     }
 
     /**
-     * Returns the 'host' portion of a URL. For example, if the URL is
+     * Returns the 'host' portion of a URL. By default this excludes the scheme
+     * and any port number - for example, if the URL is
      * http://www.example.org:447/my/file/is/here.txt?really=1 then this will
      * return 'www.example.org'.
      *
+     * Optional arguments can be used to include the scheme
+     * and/or port from the host if required.
+     *
+     * @param bool $includescheme Include the scheme (e.g. 'http://' with the host).
+     * @param bool $includeport Include the port (e.g. ':447' with the host).
      * @return string Host of the URL.
      */
-    public function get_host() {
-        return $this->host;
+    public function get_host($includescheme = false, $includeport = false) {
+        $host = '';
+
+        if ($includescheme && !empty($this->scheme)) {
+            $host .= $this->scheme . '://';
+        }
+
+        $host .= $this->host;
+
+        if ($includeport && !empty($this->port)) {
+            $host .= ':' . $this->port;
+        }
+
+        return $host;
     }
 
     /**

@@ -135,9 +135,9 @@ class blog_entry implements renderable {
         // External blog link.
         if ($this->uniquehash && $this->content) {
             if ($externalblog = $DB->get_record('blog_external', array('id' => $this->content))) {
-                $urlparts = parse_url($externalblog->url);
+                $murl = new moodle_url($externalblog->url);
                 $this->renderable->externalblogtext = get_string('retrievedfrom', 'blog') . get_string('labelsep', 'langconfig');
-                $this->renderable->externalblogtext .= html_writer::link($urlparts['scheme'] . '://'.$urlparts['host'], $externalblog->name);
+                $this->renderable->externalblogtext .= html_writer::link($murl->get_host(true), $externalblog->name);
             }
         }
 

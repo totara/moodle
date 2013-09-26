@@ -36,8 +36,9 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_heading('chat_daemon_heading', get_string('methoddaemon', 'chat'),
                        get_string('explainmethoddaemon', 'chat')));
 
+    $wwwroot = new moodle_url($CFG->wwwroot);
     $settings->add(new admin_setting_configtext('chat_serverhost', get_string('serverhost', 'chat'),
-                       get_string('configserverhost', 'chat'), get_host_from_url($CFG->wwwroot)));
+                       get_string('configserverhost', 'chat'), $wwwroot->get_host()));
 
     $settings->add(new admin_setting_configtext('chat_serverip', get_string('serverip', 'chat'),
                        get_string('configserverip', 'chat'), '127.0.0.1'));

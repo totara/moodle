@@ -114,7 +114,7 @@ function xmldb_main_install() {
     // Make sure category context exists
     context_coursecat::instance($catid);
 
-
+    $wwwroot = new moodle_url($CFG->wwwroot);
     $defaults = array(
         'rolesactive'           => '0', // marks fully set up system
         'auth'                  => 'email',
@@ -122,7 +122,7 @@ function xmldb_main_install() {
         'enrol_plugins_enabled' => 'manual,guest,self,cohort',
         'theme'                 => theme_config::DEFAULT_THEME,
         'filter_multilang_converted' => 1,
-        'siteidentifier'        => random_string(32).get_host_from_url($CFG->wwwroot),
+        'siteidentifier'        => random_string(32).$wwwroot->get_host(),
         'backup_version'        => 2008111700,
         'backup_release'        => '2.0 dev',
         'mnet_dispatcher_mode'  => 'off',

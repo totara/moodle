@@ -338,6 +338,19 @@ class core_weblib_testcase extends advanced_testcase {
         // Should return the host part only.
         $url = new moodle_url('http://www.example.org:447/my/file/is/here.txt?really=1');
         $this->assertSame('www.example.org', $url->get_host());
+
+        // Should return scheme and host.
+        $this->assertSame('http://www.example.org', $url->get_host(true));
+
+        // Should return host and port.
+        $this->assertSame('www.example.org:447', $url->get_host(false, true));
+
+        // Should return scheme, host and port.
+        $this->assertSame('http://www.example.org:447', $url->get_host(true, true));
+
+        // If no scheme or port provided, they will be excluded regardless of arguments.
+        $url = new moodle_url('http://www.example.org/my/file/is/here.txt?really=1');
+        $this->assertSame('http://www.example.org', $url->get_host(true, true));
     }
 
     public function test_moodle_url_get_port() {

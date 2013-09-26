@@ -4679,3 +4679,17 @@ function generate_email_supportuser() {
     debugging('generate_email_supportuser is deprecated, please use core_user::get_support_user');
     return core_user::get_support_user();
 }
+
+/**
+ * Returns host part from url.
+ *
+ * @deprecated since Moodle 2.6
+ * @see moodle_url::get_host()
+ * @return string host
+ */
+function get_host_from_url($url) {
+    debugging('get_host_from_url is deprecated, please use moodle_url::get_host');
+    $murl = new moodle_url($url);
+    return $murl->get_host();
+}
+

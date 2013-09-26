@@ -402,13 +402,16 @@ class OAuthRequest {
      */
     public function get_normalized_http_url() {
         $parts = parse_url($this->http_url);
+        $murl = new moodle_url($this->http_url);
 
-        $port = @$parts['port'];
-        $scheme = $parts['scheme'];
-        $host = $parts['host'];
-        $path = @$parts['path'];
+        $port = $murl->get_port();
+        $scheme = $murl->get_scheme();
+        $host = $murl->get_host();
+        $path = $murl->get_path();
 
-        $port or $port = ($scheme == 'https') ? '443' : '80';
+        if (empty($port)) {
+            $port = ($scheme == 'https') ? '443' : '80';
+        }
 
         if (($scheme == 'https' && $port != '443') || ($scheme == 'http' && $port != '80')) {
             $host = "$host:$port";

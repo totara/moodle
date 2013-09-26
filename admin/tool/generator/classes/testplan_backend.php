@@ -145,18 +145,14 @@ class tool_generator_testplan_backend extends tool_generator_backend {
         // Getting the course modules data.
         $coursedata = self::get_course_test_data($targetcourseid);
 
-        // Host and path to the site.
-        $urlcomponents = parse_url($CFG->wwwroot);
-        if (empty($urlcomponents['path'])) {
-            $urlcomponents['path'] = '';
-        }
+        $wwwroot = new moodle_url($CFG->wwwroot);
 
         $replacements = array(
             self::$users[$size],
             self::$loops[$size],
             self::$rampups[$size],
-            $urlcomponents['host'],
-            $urlcomponents['path'],
+            $wwwroot->get_host(),
+            $wwwroot->get_path(),
             get_string('shortsize_' . $size, 'tool_generator'),
             $targetcourseid,
             $coursedata->pageid,
