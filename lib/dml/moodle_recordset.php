@@ -36,6 +36,8 @@ defined('MOODLE_INTERNAL') || die();
  */
 abstract class moodle_recordset implements Iterator {
 
+    private $processor, $processorargs, $validator, $validatorargs;
+
     /**
      * Returns current record - fields as object properties, lowercase
      * @return object
@@ -74,4 +76,71 @@ abstract class moodle_recordset implements Iterator {
      * @return void
      */
     public abstract function close();
+
+    /**
+     * Set the processor function.
+     *
+     * @param callable $processor A function to call to process each record.
+     * @param array $processorargs Array of arguments to pass to the processor function.
+     */
+    public function set_processor(callable $processor, array $processorargs = array()) {
+        $this->processor = $processor;
+        $this->processorargs = $processorargs;
+    }
+
+    /**
+     * Set the validator function.
+     *
+     * @param callable $validator A function to call to validate each record.
+     * @param array $validatorargs Array of arguments to pass to the validator function.
+     */
+    public function set_validator(callable $validator, array $validatorargs = array()) {
+        $this->validator = $validator;
+        $this->validatorargs = $validatorargs;
+    }
+
+    /**
+     * Process the current record.
+     *
+     * @param object $item The current record.
+     * @return object The processed record.
+     */
+    public function process($item) {
+        // No processor set.
+        if (is_null($this->processor)) {
+            return $item;
+        }
+
+        // Pass the record to the processor and return the result instead.
+        $args = $this->processorargs;
+        array_unshift($args, $item);
+        return call_user_func_array($this->processor, $args);
+    }
+
+    public function valid() {
+        // This is the standard check for a valid record.
+        if (empty($this->current)) {
+            return false;
+        }
+
+        // No validator set.
+        if (is_null($this->validator)) {
+            return true;
+        }
+
+        // Pass the current record to the validator, and use the result to determine
+        // if the record is valid.
+        $args = $this->validatorargs;
+        array_unshift($args, $this->current());
+        $isvalid = call_user_func_array($this->validator, $args);
+
+        if (!$isvalid) {
+            // This record is invalid, skip it.
+            // Get the next record and re-check validity.
+            $this->next();
+            return $this->valid();
+        }
+
+        return true;
+    }
 }

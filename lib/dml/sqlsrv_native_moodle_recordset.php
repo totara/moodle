@@ -106,7 +106,7 @@ class sqlsrv_native_moodle_recordset extends moodle_recordset {
     }
 
     public function current() {
-        return (object)$this->current;
+        return $this->process((object)$this->current);
     }
 
     public function key() {
@@ -124,10 +124,6 @@ class sqlsrv_native_moodle_recordset extends moodle_recordset {
         } else {
             $this->current = array_shift($this->buffer);
         }
-    }
-
-    public function valid() {
-        return !empty($this->current);
     }
 
     public function close() {

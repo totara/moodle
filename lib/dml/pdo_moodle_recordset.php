@@ -56,7 +56,7 @@ class pdo_moodle_recordset extends moodle_recordset {
     }
 
     public function current() {
-        return (object)$this->current;
+        return $this->process((object)$this->current);
     }
 
     public function key() {
@@ -70,10 +70,6 @@ class pdo_moodle_recordset extends moodle_recordset {
 
     public function next() {
         $this->current = $this->fetch_next();
-    }
-
-    public function valid() {
-        return !empty($this->current);
     }
 
     public function close() {

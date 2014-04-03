@@ -1326,6 +1326,152 @@ class core_dml_testcase extends database_driver_testcase {
         $this->assertEquals($ids, $rids, '', 0, 0, true);
     }
 
+    public function test_recordset_validator() {
+        global $DB;
+
+        // Test when a validator always returns true (should have no effect).
+
+        $unmodifiedrecordset = $DB->get_recordset('user');
+        $oldresults = array();
+        foreach ($unmodifiedrecordset as $item) {
+            $oldresults[] = $item;
+        }
+        $unmodifiedrecordset->close();
+
+        $trs = $DB->get_recordset('user');
+        $trs->set_validator(function($item) {
+            return true;
+        });
+        $newresults = array();
+        foreach ($trs as $item) {
+            $newresults[] = $item;
+        }
+        $trs->close();
+
+        // Recordset should return all results unchanged.
+        $this->assertEquals($oldresults, $newresults);
+
+        // Test when a validator always returns false (expect no results).
+
+        $trs = $DB->get_recordset('user');
+        $trs->set_validator(function($item) {
+            return false;
+        });
+        $items = array();
+        foreach ($trs as $item) {
+            $items[] = $item;
+        }
+        $trs->close();
+        // Recordset should return zero results, but otherwise work
+        // as normal.
+        $this->assertCount(0, $items);
+
+        // Test a validator which validates some records but excludes others.
+
+        // The user recordset will contain 2 users (admin and guest).
+        $trs = $DB->get_recordset('user');
+
+        // Validator that checks if user is admin.
+        $trs->set_validator(function($item) {
+            return $item->username == 'admin';
+        });
+
+        $items = array();
+        foreach ($trs as $item) {
+            $items[] = $item;
+        }
+        $trs->close();
+
+        // Recordset should only return the admin user, not guest
+        // or any other users.
+        $this->assertCount(1, $items);
+
+        // The record should be unchanged.
+        $admin = $DB->get_record('user', array('username' => 'admin'));
+        $this->assertEquals($admin, current($items));
+
+        // Test validator arguments.
+        $trs = $DB->get_recordset('user');
+
+        // Validator that checks for any username.
+        $checkusername = function($item, $username) {
+            return $item->username == $username;
+        };
+        // Pass the username we want to check as an argument.
+        $trs->set_validator($checkusername, array('guest'));
+
+        $items = array();
+        foreach ($trs as $item) {
+            $items[] = $item;
+        }
+        $trs->close();
+
+        // Recordset should only return the guest user, not admin
+        // or any other users.
+        $this->assertCount(1, $items);
+
+        // The record should be unchanged.
+        $guest = $DB->get_record('user', array('username' => 'guest'));
+        $this->assertEquals($guest, current($items));
+    }
+
+    public function test_recordset_processor() {
+        global $DB;
+
+        // Test a simple processor.
+        $trs = $DB->get_recordset('user', null, '', 'id,username');
+
+        // Processor that adds a new property to each object.
+        $trs->set_processor(function($item) {
+            $item->newproperty = true;
+            return $item;
+        });
+
+        // Each item should have the newproperty added.
+        foreach ($trs as $item) {
+            $this->assertObjectHasAttribute('newproperty', $item);
+        }
+        $trs->close();
+
+        // Test processor arguments.
+        $trs = $DB->get_recordset('user', null, '', 'id,username');
+
+        // Processor that adds a property to each object with a specified value.
+        $processor = function($item, $value) {
+            $item->newproperty = $value;
+            return $item;
+        };
+        $trs->set_processor($processor, array('data'));
+
+        // Each item should have the newproperty added with the correct value.
+        foreach ($trs as $item) {
+            $this->assertEquals('data', $item->newproperty);
+        }
+        $trs->close();
+
+        // Test processing based on original recordset contents.
+        $trs = $DB->get_recordset('user', null, '', 'id,username');
+
+        // Processor that stores the first initial from the username in a
+        // new property.
+        $processor = function($item) {
+            $item->firstinitial = substr($item->username, 0, 1);
+            return $item;
+        };
+        $trs->set_processor($processor);
+
+        // Each item should have the newproperty added with the correct value.
+        foreach ($trs as $item) {
+            if ($item->username == 'admin') {
+                $this->assertEquals('a', $item->firstinitial);
+            }
+            if ($item->username == 'guest') {
+                $this->assertEquals('g', $item->firstinitial);
+            }
+        }
+        $trs->close();
+    }
+
     public function test_get_records() {
         $DB = $this->tdb;
         $dbman = $DB->get_manager();
