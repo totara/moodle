@@ -9771,3 +9771,182 @@ class lang_string {
         return array('forcedstring', 'string', 'lang');
     }
 }
+
+/**
+ * Class to allow on-the-fly processing and validation of a moodle_recordset.
+ *
+ * While it is preferrable to return the data in the correct form from the database
+ * it is not always possible when the processing required is complex. In these cases
+ * this class allows for post-processing on a per-record basis in a way which avoids
+ * memory limitations for very large recordsets.
+ *
+ * Processors allow you to define a function that accepts a record object and returns
+ * a new object. When the recordset is used, the processor return value is provided
+ * instead of the original record.
+ *
+ * Validators allow you to define a function that accepts a record object and returns
+ * a boolean value. When the recordset is used, records that return a falsey value from
+ * the validator are excluded from the recordset.
+ *
+ *
+ * Example 1: A simple validator.
+ *
+ * // Create a normal moodle recordset.
+ * $rs = $DB->get_recordset('user');
+ *
+ * // Wrap it in a transformable recordset.
+ * $trs = new recordset_transform($rs);
+ *
+ * // Define a function that does some complex processing to determine if
+ * // each record is valid.
+ * $excludewebmail = function($item) {
+ *     $emaildomain = substr($item->email, strpos($item->email, '@') + 1);
+ *
+ *     $webmaildomains = array('gmail.com', 'hotmail.com', 'yahoo.com');
+ *     return !in_array($emaildomain, $webmaildomains);
+ * };
+ *
+ * // Set the validator to use the function.
+ * $trs->set_validator($excludewebmail);
+ *
+ * // Use the recordset like normal.
+ * echo "Users with proper email addresses:\n";
+ * foreach ($trs as $user) {
+ *     echo fullname($user) . "\n";
+ * }
+ *
+ * // Closing the transformed recordset closes the moodle recordset too.
+ * $trs->close();
+ *
+ *
+ * Example 2: A processor using arguments.
+ *
+ * // Create a normal moodle recordset.
+ * $rs = $DB->get_recordset('user', null, '', 'id,username');
+ *
+ * // Wrap it in a transformable recordset.
+ * $trs = new recordset_transform($rs);
+ *
+ * // Define a processor that adds an extra property to each record.
+ * // The value is passed in as an argument.
+ * $addextraproperty = function($item, $extraproperty) {
+ *     $item->extraproperty = $extraproperty;
+ *     return $item;
+ * }
+ *
+ * // Add the property and pass in the value to set.
+ * $trs->set_processor($addextraproperty, array('myvalue'));
+ *
+ * // Use the recordset like normal.
+ * foreach ($trs as $item) {
+ *     // Each $item in here will have $item->extraproperty set to 'myvalue'.
+ * }
+ * $trs->close();
+ *
+ */
+class recordset_transform implements Iterator {
+    private $rs, $processor, $processorargs, $validator, $validatorargs;
+
+    /**
+     * Instatiate a new recordset_transform
+     *
+     * @param moodle_recordset Existing recordset to be transformed.
+     */
+    public function __construct(moodle_recordset $rs) {
+        $this->rs = $rs;
+    }
+
+    /**
+     * Set the processor function.
+     *
+     * @param callable $processor A function to call to process each record.
+     * @param array $processorargs Array of arguments to pass to the processor function.
+     */
+    public function set_processor(callable $processor, array $processorargs = array()) {
+        $this->processor = $processor;
+        $this->processorargs = $processorargs;
+    }
+
+    /**
+     * Set the validator function.
+     *
+     * @param callable $validator A function to call to validate each record.
+     * @param array $validatorargs Array of arguments to pass to the validator function.
+     */
+    public function set_validator(callable $validator, array $validatorargs = array()) {
+        $this->validator = $validator;
+        $this->validatorargs = $validatorargs;
+    }
+
+    /**
+     * Return the current record.
+     *
+     * @return object The current recordset record.
+     */
+    public function current() {
+        // No processor set.
+        if (is_null($this->processor)) {
+            return $this->rs->current();
+        }
+
+        // Pass the current record to the processor and return the result instead.
+        $args = $this->processorargs;
+        array_unshift($args, $this->rs->current());
+        return call_user_func_array($this->processor, $args);
+    }
+
+    /**
+     * Check if the current record is valid
+     *
+     * @return bool True if the current record is valid.
+     */
+    public function valid() {
+        // An invalid record will never become valid.
+        if (!$this->rs->valid()) {
+            return false;
+        }
+
+        // No validator set.
+        if (is_null($this->validator)) {
+            return $this->rs->valid();
+        }
+
+        // Pass the current record to the validator, and use the result to determine
+        // if the record is valid.
+        $args = $this->validatorargs;
+        array_unshift($args, $this->rs->current());
+        $isvalid = call_user_func_array($this->validator, $args);
+
+        if (!$isvalid) {
+            // This record is invalid, skip it.
+            // Get the next record and re-check validity.
+            $this->next();
+            return $this->valid();
+        }
+
+        return true;
+    }
+
+    // Delegate all remaining Iterator methods to the recordset being handled.
+
+    public function __destruct() {
+        return $this->rs->__destruct();
+    }
+
+    public function key() {
+        return $this->rs->key();
+    }
+
+    public function next() {
+        return $this->rs->next();
+    }
+
+    public function close() {
+        return $this->rs->close();
+    }
+
+    public function rewind() {
+        return $this->rs->rewind();
+    }
+}
+
