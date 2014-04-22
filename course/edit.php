@@ -170,7 +170,9 @@ if (!empty($course->id)) {
     $title = $streditcoursesettings;
     $fullname = $course->fullname;
 } else {
-    $PAGE->navbar->add($stradministration, new moodle_url('/admin/index.php'));
+    $hassiteconfig = has_capability('moodle/site:config', context_system::instance());
+    $url = $hassiteconfig ? new moodle_url('/admin') : null;
+    $PAGE->navbar->add($stradministration, $url);
     $PAGE->navbar->add($strcategories, new moodle_url('/course/index.php'));
     $PAGE->navbar->add($straddnewcourse);
     $title = "$site->shortname: $straddnewcourse";
