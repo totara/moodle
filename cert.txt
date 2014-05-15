@@ -1,0 +1,24 @@
+ course/archivecompletions.php   (page for manually archiving a course for all users?)
+ course/lib.php   (archive activities and completion on a course)
+ lang/en/completion.php  (some strings in here)
+ lib/completionlib.php  (for resetting completion view and data)
+ lib/moodlelib.php      (archive completion constant)
+ lib/navigationlib.php  (archive completion link in course)
+ totara/certification/db  (create course completion history table)
+
+ mod/certificate/*   (changes to support archiving certificates)
+ mod/facetoface/*    (changes to support archiving facetofaces)
+ mod/feedback/*      (changes to support archiving feedbacks)
+ mod/forum/*         (changes to support archiving forums)
+ mod/quiz/lib.php    (changes to support archiving quizs)
+ mod/scorm/lib.php   (changes to support archiving scorms)
+
+ Questions:
+
+ - What to do with course reset?
+ - Add ability to reset data for a single user? Where?
+ - What about per activity resets?
+ - Grade reset code seems a bit dodgy?
+ - What's the status of hooks idea?
+
+

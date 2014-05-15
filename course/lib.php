@@ -3574,6 +3574,7 @@ function compare_activities_by_time_asc($a, $b) {
     return ($a->timestamp < $b->timestamp) ? -1 : 1;
 }
 
+
 /**
  * Changes the visibility of a course.
  *
@@ -3686,3 +3687,138 @@ function course_change_sortorder_after_course($courseorid, $moveaftercourseid) {
     cache_helper::purge_by_event('changesincourse');
     return true;
 }
+
+
+/**
+ * Archives activities, with the archive feature, for a specified user and course
+ *
+ * @global moodle_database $DB
+ * @global object $CFG
+ * @param int $userid
+ * @param int $courseid
+ */
+function archive_course_activities($userid, $courseid) {
+    global $DB, $CFG;
+
+    // Get all distinct module names for this course.
+    $sql = "SELECT DISTINCT m.name
+            FROM {modules} m
+            JOIN {course_modules} cm ON cm.module = m.id AND course = :courseid
+            ORDER BY m.name";
+    if ($modules = $DB->get_records_sql($sql, array('courseid' => $courseid))) {
+        // Set up course completion.
+        $course = $DB->get_record('course', array('id' => $courseid), '*', MUST_EXIST);
+        $completion = new completion_info($course);
+
+        // Create the reset grade.
+        $grade = new stdClass();
+        $grade->userid   = $userid;
+        $grade->rawgrade = null;
+
+        foreach ($modules as $mod) {
+            $modfile = $CFG->dirroot . '/mod/' . $mod->name . '/lib.php';
+            // Check if a module instance is attached to the course and the lib file exists.
+            if ($DB->record_exists($mod->name, array('course' => $courseid)) && file_exists($modfile)) {
+                include_once($modfile);
+
+                // Does it have the archive feature?
+                if (plugin_supports('mod', $mod->name, FEATURE_ARCHIVE_COMPLETION, 0)) {
+                    $modfunction = $mod->name.'_archive_completion';
+                    if (!function_exists($modfunction)) {
+                        debugging('feature_archive_completion is supported but is missing the function in the plugin lib file');
+                    } else {
+                        $modfunction($userid, $courseid);
+                    }
+                } else {
+                    // Reset manually.
+                    // Reset grades.
+                    $updateitemfunc = $mod->name . '_grade_item_update';
+                    if (function_exists($updateitemfunc)) {
+                        $sql = "SELECT a.*,
+                                        cm.idnumber as cmidnumber,
+                                        m.name as modname
+                                FROM {" . $mod->name . "} a
+                                JOIN {course_modules} cm ON cm.instance = a.id AND cm.course = :courseid
+                                JOIN {modules} m ON m.id = cm.module AND m.name = :modname";
+                        $params = array('modname' => $mod->name, 'courseid' => $courseid);
+
+                        if ($modinstances = $DB->get_records_sql($sql, $params)) {
+                            foreach ($modinstances as $modinstance) {
+                                $updateitemfunc($modinstance, $grade);
+                            }
+                        }
+                    }
+                }
+
+                $resetview = plugin_supports('mod', $mod->name, FEATURE_COMPLETION_TRACKS_VIEWS, 0);
+                $cms = get_all_instances_in_course($mod->name, $course, $userid);
+                foreach ($cms as $cm) {
+                    // Get all instances doesn't return the completion columns.
+                    $cm = get_coursemodule_from_id($mod->name, $cm->coursemodule, $courseid);
+                    if ($resetview) {
+                        // Reset viewed.
+                        $completion->set_module_viewed_reset($cm, $userid);
+                    }
+
+                    // Reset completion.
+                    $completion->update_state($cm, COMPLETION_INCOMPLETE, $userid);
+
+                    // Reset cache after each activity just in case the user reattempts.
+                    $completion->invalidatecache($courseid, $userid, true);
+                }
+
+            }
+        }
+    }
+    return true;
+}
+
+/**
+ * Archives course completion
+ *
+ * @global moodle_database $DB
+ * @global object $CFG
+ * @param int $userid
+ * @param int $courseid
+ */
+function archive_course_completion($userid, $courseid) {
+    global $DB, $CFG, $COMPLETION_STATUS;
+
+    require_once($CFG->libdir . '/completionlib.php');
+    require_once($CFG->libdir . '/grade/grade_item.php');
+    require_once($CFG->libdir . '/grade/grade_grade.php');
+    require_once($CFG->dirroot . '/completion/completion_completion.php');
+
+    $params = array('course' => $courseid, 'userid' => $userid);
+    $where = "course = :course AND userid = :userid AND timecompleted IS NOT NULL";
+    if (!$course_completion = $DB->get_record_select('course_completions', $where, $params)) {
+        return false;
+    }
+
+    $history = new StdClass();
+    $history->courseid = $courseid;
+    $history->userid = $userid;
+    $history->timecompleted = $course_completion->timecompleted;
+    $history->grade = 0;
+
+    $cc = new completion_completion(array('userid' => $userid, 'course' => $courseid));
+    // TODO fix
+    $completionstatus = $cc->get_status($course_completion);
+    if ($completionstatus == $COMPLETION_STATUS[COMPLETION_STATUS_COMPLETEVIARPL]) {
+        $history->grade = $cc->rplgrade;
+    } else if ($course_item = grade_item::fetch_course_item($courseid)) {
+        $grade = new grade_grade(array('itemid' => $course_item->id, 'userid' => $userid));
+        $history->grade = $grade->finalgrade;
+    }
+
+    // Copy
+    $DB->insert_record('course_completion_history', $history);
+
+    // Reset course completion.
+    $course = $DB->get_record('course', array('id' => $courseid));
+    $completion = new completion_info($course);
+    $completion->delete_course_completion_data($userid);
+    $completion->invalidatecache($courseid, $userid, true);
+    return true;
+}
+

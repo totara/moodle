@@ -3628,5 +3628,31 @@ function xmldb_main_upgrade($oldversion) {
         upgrade_main_savepoint(true, 2014050100.00);
     }
 
+    if ($oldversion < 2014051100.00) {
+
+        // Define table course_completion_history to be created.
+        $table = new xmldb_table('course_completion_history');
+
+        // Adding fields to table course_completion_history.
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('userid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('courseid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('timecompleted', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
+        $table->add_field('grade', XMLDB_TYPE_NUMBER, '10, 5', null, null, null, null);
+
+        // Adding keys to table course_completion_history.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+        $table->add_key('courcomphist_usr_fk', XMLDB_KEY_FOREIGN, array('userid'), 'user', array('id'));
+        $table->add_key('courcomphist_cou_fk', XMLDB_KEY_FOREIGN, array('courseid'), 'course', array('id'));
+
+        // Conditionally launch create table for course_completion_history.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Main savepoint reached.
+        upgrade_main_savepoint(true, 2014051100.00);
+    }
+
     return true;
 }

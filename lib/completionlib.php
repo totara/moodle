@@ -708,6 +708,48 @@ class completion_info {
         $this->update_state($cm, COMPLETION_COMPLETE, $userid);
     }
 
+
+    /**
+     * Resets a module as not viewed
+     *
+     * Should be called whenever a module is 'viewed' (it is up to the module how to
+     * determine that). Has no effect if viewing is not set as a completion condition.
+     *
+     * Note that this function must be called before you print the page header because
+     * it is possible that the navigation block may depend on it. If you call it after
+     * printing the header, it shows a developer debug warning.
+     *
+     * @param stdClass|cm_info $cm Activity
+     * @param int $userid User ID or 0 (default) for current user
+     * @return void
+     */
+    public function set_module_viewed_reset($cm, $userid=0) {
+        global $PAGE;
+        if ($PAGE->headerprinted) {
+            debugging('set_module_viewed must be called before header is printed',
+                    DEBUG_DEVELOPER);
+        }
+
+        // Don't do anything if view condition is not turned on
+        if ($cm->completionview == COMPLETION_VIEW_NOT_REQUIRED || !$this->is_enabled($cm)) {
+            return;
+        }
+
+        // Get current completion state
+        $data = $this->get_data($cm, false, $userid);
+
+        // If we haven't already viewed it, don't do anything
+        if ($data->viewed == COMPLETION_NOT_VIEWED) {
+            return;
+        }
+
+        // OK, change state, save it, and update completion
+        $data->viewed = COMPLETION_NOT_VIEWED;
+        $this->internal_set_data($cm, $data);
+        $this->update_state($cm, COMPLETION_INCOMPLETE, $userid);
+    }
+
+
     /**
      * Determines how much completion data exists for an activity. This is used when
      * deciding whether completion information should be 'locked' in the module
