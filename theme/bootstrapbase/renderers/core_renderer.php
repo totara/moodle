@@ -60,8 +60,12 @@ class theme_bootstrapbase_core_renderer extends core_renderer {
             return '';
         }
         $breadcrumbs = array();
+        $count = count($items);
         foreach ($items as $item) {
             $item->hideicon = true;
+            if (--$count === 0) {
+                $item->action = null;
+            }
             $breadcrumbs[] = $this->render($item);
         }
         $divider = '<span class="divider">'.get_separator().'</span>';

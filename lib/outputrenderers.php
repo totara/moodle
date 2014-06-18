@@ -2917,6 +2917,9 @@ EOD;
             $item->hideicon = true;
             if ($i===0) {
                 $content = html_writer::tag('li', $this->render($item));
+            } else if ($i === $itemcount - 1) {
+                $item->action = null;
+                $content = html_writer::tag('li', $separator . $this->render($item));
             } else {
                 $content = html_writer::tag('li', $separator.$this->render($item));
             }
