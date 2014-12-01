@@ -493,6 +493,7 @@ function message_print_contacts($onlinecontacts, $offlinecontacts, $strangers, $
  * @return void
  */
 function message_print_usergroup_selector($viewing, $courses, $coursecontexts, $countunreadtotal, $countblocked, $strunreadmessages, $user1 = null) {
+    global $PAGE;
     $options = array();
 
     if ($countunreadtotal>0) { //if there are unread messages
@@ -536,8 +537,15 @@ function message_print_usergroup_selector($viewing, $courses, $coursecontexts, $
         echo html_writer::empty_tag('input', array('type' => 'hidden','name' => 'user1','value' => $user1->id));
     }
     echo html_writer::label(get_string('messagenavigation', 'message'), 'viewing');
-    echo html_writer::select($options, 'viewing', $viewing, false, array('id' => 'viewing','onchange' => 'this.form.submit()'));
+    echo html_writer::select($options, 'viewing', $viewing, false, array('id' => 'viewing', 'class' => 'autosubmit'));
     echo html_writer::end_tag('fieldset');
+
+    $go = html_writer::empty_tag('input', array('type' => 'submit', 'value' => get_string('go')));
+    echo html_writer::tag('noscript', html_writer::tag('div', $go), array('class' => 'inline'));
+    $PAGE->requires->yui_module('moodle-core-formautosubmit',
+        'M.core.init_formautosubmit',
+        array(array('selectid' => 'viewing', 'nothing' => false))
+    );
     echo html_writer::end_tag('form');
 }
 
