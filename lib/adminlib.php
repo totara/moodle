@@ -3828,6 +3828,9 @@ class admin_setting_courselist_frontpage extends admin_setting {
             if (!array_key_exists($i, $currentsetting)) {
                 $currentsetting[$i] = 'none'; //none
             }
+            $return .= '<label for="' . $this->get_id() . $i . '" class="accesshide">';
+            $return .= get_string('positionn', 'admin', $i + 1);
+            $return .= '</label>';
             $return .='<select class="form-select" id="'.$this->get_id().$i.'" name="'.$this->get_full_name().'[]">';
             foreach ($this->choices as $key => $value) {
                 $return .= '<option value="'.$key.'"'.("$key" == $currentsetting[$i] ? ' selected="selected"' : '').'>'.$value.'</option>';
@@ -6909,7 +6912,7 @@ function admin_output_new_settings_by_page($node) {
  * @param string $description
  * @param bool $label link label to id, true by default
  * @param string $warning warning text
- * @param sting $defaultinfo defaults info, null means nothing, '' is converted to "Empty" string, defaults to null
+ * @param string $defaultinfo defaults info, null means nothing, '' is converted to "Empty" string, defaults to null
  * @param string $query search query to be highlighted
  * @return string XHTML
  */
@@ -6967,9 +6970,13 @@ function format_admin_setting($setting, $title='', $form='', $description='', $l
 
     $str = '
 <div class="form-item clearfix" id="admin-'.$setting->name.'">
-  <div class="form-label">
-    <label '.$labelfor.'>'.highlightfast($query, $title).$override.$warning.'</label>
-    <span class="form-shortname">'.highlightfast($query, $name).'</span>
+  <div class="form-label">';
+    if ($labelfor !== '') {
+        $str .= '<label ' . $labelfor . ' > ' . highlightfast($query, $title) . $override . $warning . '</label >';
+    } else {
+        $str .= '<span>' . highlightfast($query, $title) . $override . $warning . '</span>';
+    }
+    $str .= '<span class="form-shortname">'.highlightfast($query, $name).'</span>
   </div>
   <div class="form-setting">'.$error.$form.$defaultinfo.'</div>
   <div class="form-description">'.highlight($query, markdown_to_html($description)).'</div>
