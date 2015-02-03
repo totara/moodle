@@ -1945,6 +1945,17 @@ abstract class moodle_database {
     }
 
     /**
+     * Returns the sql to round the given value to the specified number of decimal places.
+     *
+     * @param string $fieldname The name of the field to round.
+     * @param int $places The number of decimal places to round to.
+     * @return string The piece of SQL code to be used in your statement.
+     */
+    public function sql_round($fieldname, $places = 0) {
+        return "ROUND({$fieldname}, {$places})";
+    }
+
+    /**
      * Returns the SQL to be used in order to CAST one CHAR column to INTEGER.
      *
      * Be aware that the CHAR column you're trying to cast contains really
