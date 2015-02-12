@@ -41,6 +41,7 @@ $string['havetologin'] = 'You have to log in before you can submit your choice';
 $string['choice'] = 'Choice';
 $string['choice:addinstance'] = 'Add a new choice';
 $string['choiceclose'] = 'Until';
+$string['choicedeleted'] = 'Your choice has been deleted';
 $string['choice:deleteresponses'] = 'Delete responses';
 $string['choice:downloadresponses'] = 'Download responses';
 $string['choicefull'] = 'This choice is full and there are no available places.';

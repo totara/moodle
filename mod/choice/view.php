@@ -53,32 +53,28 @@ $PAGE->set_heading($course->fullname);
 $completion = new completion_info($course);
 $completion->set_module_viewed($cm);
 
+echo $OUTPUT->header();
+echo $OUTPUT->heading(format_string($choice->name), 2, null);
+
 /// Submit any new data if there is any
 if (data_submitted() && is_enrolled($context, NULL, 'mod/choice:choose') && confirm_sesskey()) {
     $timenow = time();
     if (has_capability('mod/choice:deleteresponses', $context) && $action == 'delete') {
-        //some responses need to be deleted
-        choice_delete_responses($attemptids, $choice, $cm, $course); //delete responses.
-        redirect("view.php?id=$cm->id");
-    }
-
-    if ($choice->allowmultiple) {
-        $answer = optional_param_array('answer', array(), PARAM_INT);
+        choice_delete_responses($attemptids, $choice, $cm, $course);
+        echo $OUTPUT->notification(get_string('choicedeleted', 'choice'), 'notifymessage');
     } else {
-        $answer = optional_param('answer', '', PARAM_INT);
+        if ($choice->allowmultiple) {
+            $answer = optional_param_array('answer', array(), PARAM_INT);
+        } else {
+            $answer = optional_param('answer', '', PARAM_INT);
+        }
+        if (empty($answer)) {
+            echo $OUTPUT->notification(get_string('mustchooseone', 'choice'));
+        } else {
+            choice_user_submit_response($answer, $choice, $USER->id, $course, $cm);
+            echo $OUTPUT->notification(get_string('choicesaved', 'choice'),'notifysuccess');
+        }
     }
-
-    if (empty($answer)) {
-        redirect("view.php?id=$cm->id", get_string('mustchooseone', 'choice'));
-    } else {
-        choice_user_submit_response($answer, $choice, $USER->id, $course, $cm);
-    }
-    echo $OUTPUT->header();
-    echo $OUTPUT->heading(format_string($choice->name), 2, null);
-    echo $OUTPUT->notification(get_string('choicesaved', 'choice'),'notifysuccess');
-} else {
-    echo $OUTPUT->header();
-    echo $OUTPUT->heading(format_string($choice->name), 2, null);
 }
 
 
