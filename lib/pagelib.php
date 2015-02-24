@@ -1563,13 +1563,13 @@ class moodle_page {
         foreach ($themeorder as $themetype) {
             switch ($themetype) {
                 case 'course':
-                    if (!empty($CFG->allowcoursethemes) && !empty($this->_course->theme) && $this->devicetypeinuse == 'default') {
+                    if (!empty($CFG->allowcoursethemes) && !empty($this->_course->theme)) {
                         return $this->_course->theme;
                     }
                 break;
 
                 case 'category':
-                    if (!empty($CFG->allowcategorythemes) && $this->devicetypeinuse == 'default') {
+                    if (!empty($CFG->allowcategorythemes)) {
                         $categories = $this->categories;
                         foreach ($categories as $category) {
                             if (!empty($category->theme)) {
@@ -1586,12 +1586,19 @@ class moodle_page {
                 break;
 
                 case 'user':
-                    if (!empty($CFG->allowuserthemes) && !empty($USER->theme) && $this->devicetypeinuse == 'default') {
+                    if (!empty($CFG->allowuserthemes) && !empty($USER->theme)) {
                         if ($mnetpeertheme) {
                             return $mnetpeertheme;
                         } else {
                             return $USER->theme;
                         }
+                    }
+                break;
+
+                case 'device':
+                    $devicetheme = core_useragent::get_device_type_theme($this->devicetypeinuse);
+                    if (!empty($devicetheme)) {
+                        return $devicetheme;
                     }
                 break;
 
