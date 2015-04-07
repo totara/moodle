@@ -100,14 +100,11 @@ echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('adduserstogroup', 'group').": $groupname", 3);
 
 // Store the rows we want to display in the group info.
-$groupinforow = array();
+$groupinfo = '';
 
 // Check if there is a picture to display.
 if (!empty($group->picture)) {
-    $picturecell = new html_table_cell();
-    $picturecell->attributes['class'] = 'left side picture';
-    $picturecell->text = print_group_picture($group, $course->id, true, true, false);
-    $groupinforow[] = $picturecell;
+    $groupinfo .= print_group_picture($group, $course->id, true, true, false);
 }
 
 // Check if there is a description to display.
@@ -119,19 +116,14 @@ if (!empty($group->description)) {
 
     $options = new stdClass;
     $options->overflowdiv = true;
-
-    $contentcell = new html_table_cell();
-    $contentcell->attributes['class'] = 'content';
-    $contentcell->text = format_text($group->description, $group->descriptionformat, $options);
-    $groupinforow[] = $contentcell;
+    $formattedtext = format_text($group->description, $group->descriptionformat, $options);
+    $cssclasses = 'description' . (empty($group->picture) ? '' : ' has-picture');
+    $groupinfo .= html_writer::div($formattedtext, null, array('class' => $cssclasses));
 }
 
 // Check if we have something to show.
-if (!empty($groupinforow)) {
-    $groupinfotable = new html_table();
-    $groupinfotable->attributes['class'] = 'groupinfobox';
-    $groupinfotable->data[] = new html_table_row($groupinforow);
-    echo html_writer::table($groupinfotable);
+if (!empty($groupinfo)) {
+    echo html_writer::div($groupinfo, null, array('id' => 'groupinfo'));
 }
 
 /// Print the editing form

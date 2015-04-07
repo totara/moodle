@@ -1,0 +1,15 @@
+#groupinfo a {
+    float: left;
+}
+
+.dir-rtl #groupinfo a {
+    float: right;
+}
+
+.dir-ltr #groupinfo .description.has-picture {
+    margin-left: 120px;
+}
+
+.dir-rtl #groupinfo .description.has-picture {
+    margin-right: 120px;
+}
