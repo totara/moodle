@@ -2623,7 +2623,7 @@ function redirect($url, $message='', $delay=-1) {
 
     if (!empty($message)) {
         if ($delay === -1 || !is_numeric($delay)) {
-            $delay = 3;
+            $delay = isset($CFG->redirectdelaytime) ? $CFG->redirectdelaytime : 3;
         }
         $message = clean_text($message);
     } else {
